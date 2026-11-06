@@ -1214,22 +1214,32 @@ Library.create_ui = function(self)
                 TweenService:Create(breath, TweenInfo.new(1.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Scale = 1.07 }):Play()
         end
 
+        local navBox = Instance.new("Frame")
+        navBox.Name = "NavBox"
+        navBox.Position = UDim2.new(0, 12, 0, 50)
+        navBox.Size = UDim2.new(0, 136, 0, 64)
+        navBox.BackgroundColor3 = Theme.card
+        navBox.BorderSizePixel = 0
+        navBox.Parent = frame7
+        add_corner(navBox, 10)
+        add_stroke(navBox, Theme.stroke, 0)
+
         local scrollingFrame = Instance.new("ScrollingFrame")
         scrollingFrame.ScrollBarImageTransparency = 1
         scrollingFrame.ScrollBarThickness = 0
         scrollingFrame.Name = "Tabs"
-        scrollingFrame.Size = UDim2.new(0, 136, 0, 346)
+        scrollingFrame.Size = UDim2.new(1, -16, 1, -72)
         scrollingFrame.Selectable = false
         scrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.XY
         scrollingFrame.BackgroundTransparency = 1
-        scrollingFrame.Position = UDim2.new(0, 12, 0, 54)
+        scrollingFrame.Position = UDim2.new(0, 8, 0, 8)
         scrollingFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
         scrollingFrame.BackgroundColor3 = Color3.fromRGB(235, 235, 245)
         scrollingFrame.BorderSizePixel = 0
         scrollingFrame.CanvasSize = UDim2.new(0, 0, 0.5, 0)
-        scrollingFrame.Parent = frame7
+        scrollingFrame.Parent = navBox
         local uiListLayout = Instance.new("UIListLayout")
-        uiListLayout.Padding = UDim.new(0, 6)
+        uiListLayout.Padding = UDim.new(0, 4)
         uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         uiListLayout.Parent = scrollingFrame
 
@@ -1354,17 +1364,17 @@ Library.create_ui = function(self)
 
         local playerCapsule = Instance.new("Frame")
         playerCapsule.Name = "PlayerCapsule"
-        playerCapsule.Size = UDim2.new(0, 136, 0, 52)
         playerCapsule.AnchorPoint = Vector2.new(0, 1)
-        playerCapsule.Position = UDim2.new(0, 12, 1, -12)
+        playerCapsule.Size = UDim2.new(1, -16, 0, 44)
+        playerCapsule.Position = UDim2.new(0, 8, 1, -8)
         playerCapsule.BackgroundColor3 = Theme.profile
         playerCapsule.BorderSizePixel = 0
-        playerCapsule.Parent = frame7
-        add_corner(playerCapsule, 10)
+        playerCapsule.Parent = navBox
+        add_corner(playerCapsule, 9)
         add_stroke(playerCapsule, Theme.stroke, 0)
         local imageLabel = Instance.new("ImageLabel")
-        imageLabel.Size = UDim2.new(0, 32, 0, 32)
-        imageLabel.Position = UDim2.new(0, 10, 0.5, 0)
+        imageLabel.Size = UDim2.new(0, 28, 0, 28)
+        imageLabel.Position = UDim2.new(0, 9, 0.5, 0)
         imageLabel.AnchorPoint = Vector2.new(0, 0.5)
         imageLabel.BackgroundTransparency = 1
         imageLabel.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
@@ -1380,16 +1390,16 @@ Library.create_ui = function(self)
         end)
 
         imageLabel.Parent = playerCapsule
-        add_corner(imageLabel, 16)
+        add_corner(imageLabel, 14)
         add_stroke(imageLabel, Color3.fromRGB(47, 47, 47), 0.2)
         local frame5 = Instance.new("Frame")
-        frame5.Size = UDim2.new(1, -52, 1, 0)
-        frame5.Position = UDim2.new(0, 50, 0, 0)
+        frame5.Size = UDim2.new(1, -46, 1, 0)
+        frame5.Position = UDim2.new(0, 42, 0, 0)
         frame5.BackgroundTransparency = 1
         frame5.Parent = playerCapsule
         local textLabel4 = Instance.new("TextLabel")
-        textLabel4.Size = UDim2.new(1, 0, 0, 14)
-        textLabel4.Position = UDim2.new(0, 0, 0, 9)
+        textLabel4.Size = UDim2.new(1, 0, 0, 13)
+        textLabel4.Position = UDim2.new(0, 0, 0, 7)
         textLabel4.BackgroundTransparency = 1
         textLabel4.Text = Players.LocalPlayer.DisplayName or Players.LocalPlayer.Name
         textLabel4.TextXAlignment = Enum.TextXAlignment.Left
@@ -1400,8 +1410,8 @@ Library.create_ui = function(self)
         textLabel4.TextTruncate = Enum.TextTruncate.AtEnd
         textLabel4.Parent = frame5
         local textLabel2 = Instance.new("TextLabel")
-        textLabel2.Size = UDim2.new(1, 0, 0, 11)
-        textLabel2.Position = UDim2.new(0, 0, 0, 27)
+        textLabel2.Size = UDim2.new(1, 0, 0, 10)
+        textLabel2.Position = UDim2.new(0, 0, 0, 24)
         textLabel2.BackgroundTransparency = 1
         textLabel2.Text = "@" .. Players.LocalPlayer.Name
         textLabel2.TextXAlignment = Enum.TextXAlignment.Left
@@ -1412,8 +1422,16 @@ Library.create_ui = function(self)
         textLabel2.TextTruncate = Enum.TextTruncate.AtEnd
         textLabel2.Parent = frame5
 
+        local navDivider = Instance.new("Frame")
+        navDivider.Name = "Divider"
+        navDivider.Position = UDim2.new(0, 10, 1, -60)
+        navDivider.Size = UDim2.new(1, -20, 0, 1)
+        navDivider.BackgroundColor3 = Theme.line
+        navDivider.BorderSizePixel = 0
+        navDivider.Parent = navBox
+
         playerCapsule.MouseEnter:Connect(function()
-                TweenService:Create(playerCapsule, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { BackgroundColor3 = Color3.fromRGB(22, 22, 22) }):Play()
+                TweenService:Create(playerCapsule, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { BackgroundColor3 = Color3.fromRGB(24, 24, 24) }):Play()
         end)
 
         playerCapsule.MouseLeave:Connect(function()
@@ -1540,9 +1558,8 @@ Library.create_ui = function(self)
                 sidebar.Visible = visible
                 sidebarDivider.Visible = visible
                 frame2.Visible = visible
-                scrollingFrame.Visible = visible
+                navBox.Visible = visible
                 folder.Visible = visible
-                playerCapsule.Visible = visible
                 textLabel.Visible = visible
 
                 pillTitle.Visible = not visible
@@ -1608,6 +1625,13 @@ Library.create_ui = function(self)
 
                                         TweenService:Create(child.TextLabel, tabTween, { TextTransparency = 0, TextColor3 = Theme.text }):Play()
                                         TweenService:Create(child.Icon, tabTween, { ImageTransparency = 0, ImageColor3 = accent() }):Play()
+
+                                        local accentBar = child:FindFirstChild("Accent")
+
+                                        if accentBar then
+                                                accentBar.BackgroundColor3 = accent()
+                                                TweenService:Create(accentBar, tabTween, { BackgroundTransparency = 0 }):Play()
+                                        end
                                 elseif child.BackgroundTransparency ~= 1 then
                                         TweenService:Create(child, tabTween, { BackgroundTransparency = 1 }):Play()
 
@@ -1621,6 +1645,12 @@ Library.create_ui = function(self)
                                         }):Play()
 
                                         TweenService:Create(child.Icon, tabTween, { ImageTransparency = 0.3, ImageColor3 = Theme.dim }):Play()
+
+                                        local accentBar = child:FindFirstChild("Accent")
+
+                                        if accentBar then
+                                                TweenService:Create(accentBar, tabTween, { BackgroundTransparency = 1 }):Play()
+                                        end
                                 end
                         end
                 end
@@ -1662,7 +1692,7 @@ Library.create_ui = function(self)
 
         self.create_tab = function(self, text, image)
                 local tab = {}
-                local textBoundsAsync = text_bounds(text, 12, Enum.FontWeight.Medium)
+                local textBoundsAsync = text_bounds(text, 11, Enum.FontWeight.Medium)
                 local isFirstTab = not scrollingFrame:FindFirstChild("Tab")
                 local textButton = Instance.new("TextButton")
                 textButton.FontFace = Font.new(FONT, Enum.FontWeight.Medium, Enum.FontStyle.Normal)
@@ -1672,27 +1702,37 @@ Library.create_ui = function(self)
                 textButton.AutoButtonColor = false
                 textButton.BackgroundTransparency = 1
                 textButton.Name = "Tab"
-                textButton.Size = UDim2.new(1, 0, 0, 38)
+                textButton.Size = UDim2.new(1, 0, 0, 28)
                 textButton.BorderSizePixel = 0
-                textButton.TextSize = 12
+                textButton.TextSize = 11
                 textButton.BackgroundColor3 = Theme.tint
                 textButton.Parent = scrollingFrame
                 textButton.LayoutOrder = self._tab
-                add_corner(textButton, 10)
+                add_corner(textButton, 7)
                 local tabStroke = add_stroke(textButton, Theme.stroke_mid, 1)
                 tabStroke.Name = "TabStroke"
+                local accentBar = Instance.new("Frame")
+                accentBar.Name = "Accent"
+                accentBar.AnchorPoint = Vector2.new(0, 0.5)
+                accentBar.Position = UDim2.new(0, 5, 0.5, 0)
+                accentBar.Size = UDim2.new(0, 2, 0, 13)
+                accentBar.BackgroundColor3 = accent()
+                accentBar.BackgroundTransparency = 1
+                accentBar.BorderSizePixel = 0
+                accentBar.Parent = textButton
+                add_corner(accentBar, 2)
                 local textLabel4 = Instance.new("TextLabel")
                 textLabel4.FontFace = Font.new(FONT, Enum.FontWeight.Medium, Enum.FontStyle.Normal)
                 textLabel4.TextColor3 = Theme.dim
                 textLabel4.TextTransparency = 0.15
                 textLabel4.Text = text
-                textLabel4.Size = UDim2.new(0, textBoundsAsync.X, 0, 14)
+                textLabel4.Size = UDim2.new(0, textBoundsAsync.X, 0, 12)
                 textLabel4.AnchorPoint = Vector2.new(0, 0.5)
-                textLabel4.Position = UDim2.new(0, 40, 0.5, 0)
+                textLabel4.Position = UDim2.new(0, 31, 0.5, 0)
                 textLabel4.BackgroundTransparency = 1
                 textLabel4.TextXAlignment = Enum.TextXAlignment.Left
                 textLabel4.BorderSizePixel = 0
-                textLabel4.TextSize = 12
+                textLabel4.TextSize = 11
                 textLabel4.Parent = textButton
                 local imageLabel = Instance.new("ImageLabel")
                 imageLabel.ScaleType = Enum.ScaleType.Fit
@@ -1700,7 +1740,7 @@ Library.create_ui = function(self)
                 imageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
                 imageLabel.AnchorPoint = Vector2.new(0, 0.5)
                 imageLabel.BackgroundTransparency = 1
-                imageLabel.Position = UDim2.new(0, 14, 0.5, 0)
+                imageLabel.Position = UDim2.new(0, 12, 0.5, 0)
                 imageLabel.Name = "Icon"
 
                 if type(image) == "table" then
@@ -1711,7 +1751,7 @@ Library.create_ui = function(self)
                         imageLabel.Image = image
                 end
                 imageLabel.ImageColor3 = Theme.dim
-                imageLabel.Size = UDim2.new(0, 18, 0, 18)
+                imageLabel.Size = UDim2.new(0, 14, 0, 14)
                 imageLabel.BorderSizePixel = 0
                 imageLabel.Parent = textButton
 
@@ -1774,6 +1814,7 @@ Library.create_ui = function(self)
                 uiPadding2.PaddingBottom = UDim.new(0, 12)
                 uiPadding2.Parent = scrollingFrame2
                 self._tab = self._tab + 1
+                navBox.Size = UDim2.new(0, 136, 0, 64 + self._tab * 28 + (self._tab - 1) * 4 + 8)
 
                 if isFirstTab then
                         self._active_tab_ref = textButton
@@ -2927,6 +2968,527 @@ Library.create_ui = function(self)
                                 end
 
                                 return true
+                        end
+
+                        module.create_colorpicker = function(self, config)
+                                order = order + 1
+                                local element = { _state = false }
+
+                                if self._size == 0 then
+                                        self._size = 16
+                                end
+
+                                self._size = self._size + 24
+
+                                if module._state then
+                                        frame.Size = UDim2.new(1, 0, 0, CARD_BASE + self._size)
+                                end
+
+                                frame9.Size = UDim2.new(1, 0, 0, self._size)
+
+                                local function color_to_hex(color)
+                                        return string.format("%02X%02X%02X", math.floor(color.R * 255 + 0.5), math.floor(color.G * 255 + 0.5), math.floor(color.B * 255 + 0.5))
+                                end
+
+                                local function hex_to_color(text)
+                                        if type(text) ~= "string" then
+                                                return nil
+                                        end
+
+                                        local cleaned = string.gsub(string.gsub(text, "#", ""), " ", "")
+
+                                        if #cleaned == 3 then
+                                                cleaned = string.gsub(cleaned, "(.)", "%1%1")
+                                        end
+
+                                        if #cleaned ~= 6 then
+                                                return nil
+                                        end
+
+                                        local r = tonumber(string.sub(cleaned, 1, 2), 16)
+                                        local g = tonumber(string.sub(cleaned, 3, 4), 16)
+                                        local b = tonumber(string.sub(cleaned, 5, 6), 16)
+
+                                        if not r or not g or not b then
+                                                return nil
+                                        end
+
+                                        return Color3.fromRGB(r, g, b)
+                                end
+
+                                local currentColor = config.color or Color3.fromRGB(255, 255, 255)
+
+                                if Library:flag_type(config.flag, "string") then
+                                        local savedColor = hex_to_color(Library._config._flags [config.flag])
+
+                                        if savedColor then
+                                                currentColor = savedColor
+                                        end
+                                end
+
+                                local rowButton = Instance.new("TextButton")
+                                rowButton.FontFace = Font.new(FONT, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+                                rowButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+                                rowButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                                rowButton.Text = ""
+                                rowButton.AutoButtonColor = false
+                                rowButton.BackgroundTransparency = 1
+                                rowButton.Name = "ColorPicker"
+                                rowButton.Size = UDim2.new(1, 0, 0, 18)
+                                rowButton.BorderSizePixel = 0
+                                rowButton.TextSize = 14
+                                rowButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                rowButton.Parent = frame9
+                                rowButton.LayoutOrder = order
+
+                                local rowLabel = Instance.new("TextLabel")
+                                rowLabel.Name = "TitleLabel"
+
+                                if language == "th" then
+                                        rowLabel.FontFace = Font.new("rbxasset://fonts/families/NotoSansThai.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+                                        rowLabel.TextSize = 13
+                                else
+                                        rowLabel.FontFace = Font.new(FONT, Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                                        rowLabel.TextSize = 11
+                                end
+
+                                rowLabel.TextColor3 = Theme.text
+                                rowLabel.TextTransparency = 0
+                                rowLabel.Text = config.title or "Color"
+                                rowLabel.Size = UDim2.new(1, -64, 0, 13)
+                                rowLabel.AnchorPoint = Vector2.new(0, 0.5)
+                                rowLabel.Position = UDim2.new(0, 0, 0.5, 0)
+                                rowLabel.BackgroundTransparency = 1
+                                rowLabel.TextXAlignment = Enum.TextXAlignment.Left
+                                rowLabel.TextTruncate = Enum.TextTruncate.AtEnd
+                                rowLabel.Parent = rowButton
+
+                                local swatch = Instance.new("Frame")
+                                swatch.Name = "Swatch"
+                                swatch.AnchorPoint = Vector2.new(1, 0.5)
+                                swatch.Position = UDim2.new(1, 0, 0.5, 0)
+                                swatch.Size = UDim2.new(0, 15, 0, 15)
+                                swatch.BackgroundColor3 = currentColor
+                                swatch.BorderSizePixel = 0
+                                swatch.Parent = rowButton
+                                add_corner(swatch, 5)
+                                local swatchStroke = add_stroke(swatch, Color3.fromRGB(255, 255, 255), 0.72)
+                                swatch:SetAttribute("KazeGuard", true)
+                                swatchStroke:SetAttribute("KazeGuard", true)
+
+                                local pickerPanel = nil
+                                local pickerScale = nil
+                                local pickerField = nil
+                                local pickerCursor = nil
+                                local pickerHueBar = nil
+                                local pickerHueKnob = nil
+                                local pickerHexBox = nil
+                                local outsideConnection = nil
+                                local pointerOffset = Vector2.zero
+                                local currentHue, currentSaturation, currentValue = Color3.toHSV(currentColor)
+
+                                local function apply_color(color)
+                                        currentColor = color
+                                        swatch.BackgroundColor3 = color
+                                        Library._config._flags [config.flag] = color_to_hex(color)
+                                        config.callback(color)
+                                end
+
+                                local function set_color(hue, satLevel, valLevel)
+                                        currentHue = hue
+                                        currentSaturation = satLevel
+                                        currentValue = valLevel
+
+                                        local color = Color3.fromHSV(hue, satLevel, valLevel)
+
+                                        if pickerPanel then
+                                                pickerField.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+                                                pickerCursor.Position = UDim2.new(satLevel, 0, 1 - valLevel, 0)
+                                                pickerHueKnob.Position = UDim2.new(hue, 0, 0.5, 0)
+
+                                                if not pickerHexBox:IsFocused() then
+                                                        pickerHexBox.Text = "#" .. color_to_hex(color)
+                                                end
+                                        end
+
+                                        apply_color(color)
+                                end
+
+                                local function calibrate_pointer(dragFrame)
+                                        local kazeGui = game:GetService("GuiService")
+                                        local inset = kazeGui:GetGuiInset()
+                                        local location = UserInputService:GetMouseLocation()
+                                        local topLeft = dragFrame.AbsolutePosition
+                                        local bottomRight = topLeft + dragFrame.AbsoluteSize
+
+                                        for _, offset in ipairs({ Vector2.new(0, 0), inset, -inset }) do
+                                                local point = location + offset
+
+                                                if point.X >= topLeft.X and point.X <= bottomRight.X and point.Y >= topLeft.Y and point.Y <= bottomRight.Y then
+                                                        pointerOffset = offset
+
+                                                        return
+                                                end
+                                        end
+                                end
+
+                                local function update_field()
+                                        local location = UserInputService:GetMouseLocation() + pointerOffset
+                                        local satLevel = math.clamp((location.X - pickerField.AbsolutePosition.X) / math.max(1, pickerField.AbsoluteSize.X), 0, 1)
+                                        local valLevel = math.clamp((location.Y - pickerField.AbsolutePosition.Y) / math.max(1, pickerField.AbsoluteSize.Y), 0, 1)
+
+                                        set_color(currentHue, satLevel, 1 - valLevel)
+                                end
+
+                                local function update_hue()
+                                        local location = UserInputService:GetMouseLocation() + pointerOffset
+                                        local hue = math.clamp((location.X - pickerHueBar.AbsolutePosition.X) / math.max(1, pickerHueBar.AbsoluteSize.X), 0, 1)
+
+                                        set_color(hue, currentSaturation, currentValue)
+                                end
+
+                                local function begin_drag(update, dragFrame)
+                                        calibrate_pointer(dragFrame)
+                                        update()
+
+                                        Connections ["worldcp_move_" .. config.flag] = UserInputService.InputChanged:Connect(function(input)
+                                                if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then
+                                                        return
+                                                end
+
+                                                update()
+                                        end)
+
+                                        Connections ["worldcp_end_" .. config.flag] = UserInputService.InputEnded:Connect(function(input)
+                                                if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                                                        return
+                                                end
+
+                                                Connections:disconnect("worldcp_move_" .. config.flag)
+                                                Connections:disconnect("worldcp_end_" .. config.flag)
+                                                Config:save(game.GameId, Library._config)
+                                        end)
+                                end
+
+                                local function build_picker()
+                                        local root = window and window._ui and window._ui:FindFirstChild("Handler", true)
+
+                                        if not root then
+                                                return false
+                                        end
+
+                                        pickerPanel = Instance.new("Frame")
+                                        pickerPanel.Name = "KazeWorldColorPopup"
+                                        pickerPanel.Position = UDim2.fromOffset(8, 8)
+                                        pickerPanel.Size = UDim2.fromOffset(234, 200)
+                                        pickerPanel.BackgroundColor3 = Color3.fromRGB(14, 14, 16)
+                                        pickerPanel.BorderSizePixel = 0
+                                        pickerPanel.Visible = false
+                                        pickerPanel.Active = true
+                                        pickerPanel.ZIndex = 30
+                                        pickerPanel.Parent = root
+                                        pickerPanel:SetAttribute("KazeGuard", true)
+                                        add_corner(pickerPanel, 9)
+                                        local panelStroke = add_stroke(pickerPanel, Color3.fromRGB(255, 255, 255), 0.72)
+                                        panelStroke:SetAttribute("KazeGuard", true)
+
+                                        pickerScale = Instance.new("UIScale")
+                                        pickerScale.Scale = 1
+                                        pickerScale.Parent = pickerPanel
+
+                                        local panelTitle = Instance.new("TextLabel")
+                                        panelTitle.Name = "Title"
+                                        panelTitle.Position = UDim2.fromOffset(10, 8)
+                                        panelTitle.Size = UDim2.fromOffset(120, 13)
+                                        panelTitle.BackgroundTransparency = 1
+                                        panelTitle.BorderSizePixel = 0
+                                        panelTitle.FontFace = Font.new(FONT, Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+                                        panelTitle.TextSize = 10
+                                        panelTitle.TextColor3 = Theme.text_mid
+                                        panelTitle.Text = config.title or "Color"
+                                        panelTitle.TextXAlignment = Enum.TextXAlignment.Left
+                                        panelTitle.TextYAlignment = Enum.TextYAlignment.Center
+                                        panelTitle.TextTruncate = Enum.TextTruncate.AtEnd
+                                        panelTitle.ZIndex = 32
+                                        panelTitle.Parent = pickerPanel
+
+                                        pickerHexBox = Instance.new("TextBox")
+                                        pickerHexBox.Name = "Hex"
+                                        pickerHexBox.AnchorPoint = Vector2.new(1, 0)
+                                        pickerHexBox.Position = UDim2.new(1, -10, 0, 8)
+                                        pickerHexBox.Size = UDim2.fromOffset(66, 18)
+                                        pickerHexBox.BackgroundColor3 = Color3.fromRGB(21, 21, 25)
+                                        pickerHexBox.BorderSizePixel = 0
+                                        pickerHexBox.ClipsDescendants = true
+                                        pickerHexBox.ClearTextOnFocus = false
+                                        pickerHexBox.Text = "#" .. color_to_hex(currentColor)
+                                        pickerHexBox.PlaceholderText = "#RRGGBB"
+                                        pickerHexBox.FontFace = Font.new(FONT, Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                                        pickerHexBox.TextSize = 11
+                                        pickerHexBox.TextColor3 = Color3.fromRGB(235, 235, 240)
+                                        pickerHexBox.TextXAlignment = Enum.TextXAlignment.Center
+                                        pickerHexBox.TextYAlignment = Enum.TextYAlignment.Center
+                                        pickerHexBox.TextWrapped = false
+                                        pickerHexBox.ZIndex = 32
+                                        pickerHexBox.Parent = pickerPanel
+                                        add_corner(pickerHexBox, 4)
+                                        local hexStroke = add_stroke(pickerHexBox, Color3.fromRGB(255, 255, 255), 0.72)
+                                        hexStroke:SetAttribute("KazeGuard", true)
+
+                                        pickerHexBox.Focused:Connect(function()
+                                                pickerHexBox.CursorPosition = 1
+                                                pickerHexBox.SelectionStart = string.len(pickerHexBox.Text) + 1
+                                        end)
+
+                                        pickerHexBox.FocusLost:Connect(function()
+                                                local parsedColor = hex_to_color(pickerHexBox.Text)
+
+                                                if parsedColor then
+                                                        set_color(Color3.toHSV(parsedColor))
+                                                        Config:save(game.GameId, Library._config)
+                                                else
+                                                        pickerHexBox.Text = "#" .. color_to_hex(currentColor)
+                                                end
+                                        end)
+
+                                        pickerField = Instance.new("TextButton")
+                                        pickerField.Name = "Field"
+                                        pickerField.Position = UDim2.fromOffset(10, 30)
+                                        pickerField.Size = UDim2.fromOffset(214, 110)
+                                        pickerField.BackgroundColor3 = Color3.fromHSV(currentHue, 1, 1)
+                                        pickerField.BorderSizePixel = 0
+                                        pickerField.ClipsDescendants = true
+                                        pickerField.AutoButtonColor = false
+                                        pickerField.Text = ""
+                                        pickerField.ZIndex = 32
+                                        pickerField.Parent = pickerPanel
+                                        add_corner(pickerField, 5)
+
+                                        local saturationFrame = Instance.new("Frame")
+                                        saturationFrame.Name = "Saturation"
+                                        saturationFrame.Size = UDim2.new(1, 0, 1, 0)
+                                        saturationFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                        saturationFrame.BorderSizePixel = 0
+                                        saturationFrame.ZIndex = 33
+                                        saturationFrame.Parent = pickerField
+
+                                        local saturationGradient = Instance.new("UIGradient")
+                                        saturationGradient.Transparency = NumberSequence.new{
+                                                NumberSequenceKeypoint.new(0, 0),
+                                                NumberSequenceKeypoint.new(1, 1),
+                                        }
+                                        saturationGradient.Parent = saturationFrame
+
+                                        local brightnessFrame = Instance.new("Frame")
+                                        brightnessFrame.Name = "Brightness"
+                                        brightnessFrame.Size = UDim2.new(1, 0, 1, 0)
+                                        brightnessFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                        brightnessFrame.BorderSizePixel = 0
+                                        brightnessFrame.ZIndex = 34
+                                        brightnessFrame.Parent = pickerField
+
+                                        local brightnessGradient = Instance.new("UIGradient")
+                                        brightnessGradient.Rotation = 90
+                                        brightnessGradient.Transparency = NumberSequence.new{
+                                                NumberSequenceKeypoint.new(0, 1),
+                                                NumberSequenceKeypoint.new(1, 0),
+                                        }
+                                        brightnessGradient.Parent = brightnessFrame
+
+                                        pickerCursor = Instance.new("Frame")
+                                        pickerCursor.Name = "Cursor"
+                                        pickerCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+                                        pickerCursor.Position = UDim2.new(currentSaturation, 0, 1 - currentValue, 0)
+                                        pickerCursor.Size = UDim2.fromOffset(14, 14)
+                                        pickerCursor.BackgroundTransparency = 1
+                                        pickerCursor.BorderSizePixel = 0
+                                        pickerCursor.ZIndex = 35
+                                        pickerCursor.Parent = pickerField
+                                        add_corner(pickerCursor, 7)
+                                        local cursorStroke = add_stroke(pickerCursor, Color3.fromRGB(255, 255, 255), 0)
+                                        cursorStroke.Thickness = 2
+                                        cursorStroke:SetAttribute("KazeGuard", true)
+
+                                        pickerHueBar = Instance.new("TextButton")
+                                        pickerHueBar.Name = "Hue"
+                                        pickerHueBar.Position = UDim2.fromOffset(10, 148)
+                                        pickerHueBar.Size = UDim2.fromOffset(214, 12)
+                                        pickerHueBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                        pickerHueBar.BorderSizePixel = 0
+                                        pickerHueBar.AutoButtonColor = false
+                                        pickerHueBar.Text = ""
+                                        pickerHueBar.ZIndex = 32
+                                        pickerHueBar.Parent = pickerPanel
+                                        add_corner(pickerHueBar, 6)
+
+                                        local hueGradient = Instance.new("UIGradient")
+                                        hueGradient.Color = ColorSequence.new{
+                                                ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+                                                ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+                                                ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                                                ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
+                                                ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
+                                                ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                                                ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0)),
+                                        }
+                                        hueGradient.Parent = pickerHueBar
+
+                                        pickerHueKnob = Instance.new("Frame")
+                                        pickerHueKnob.Name = "Knob"
+                                        pickerHueKnob.AnchorPoint = Vector2.new(0.5, 0.5)
+                                        pickerHueKnob.Position = UDim2.new(currentHue, 0, 0.5, 0)
+                                        pickerHueKnob.Size = UDim2.fromOffset(5, 16)
+                                        pickerHueKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                        pickerHueKnob.BorderSizePixel = 0
+                                        pickerHueKnob.ZIndex = 33
+                                        pickerHueKnob.Parent = pickerHueBar
+                                        add_corner(pickerHueKnob, 3)
+                                        local knobStroke = add_stroke(pickerHueKnob, Color3.fromRGB(20, 20, 24), 0.42)
+                                        knobStroke:SetAttribute("KazeGuard", true)
+
+                                        local presetsHolder = Instance.new("Frame")
+                                        presetsHolder.Name = "Presets"
+                                        presetsHolder.Position = UDim2.fromOffset(10, 168)
+                                        presetsHolder.Size = UDim2.fromOffset(214, 19)
+                                        presetsHolder.BackgroundTransparency = 1
+                                        presetsHolder.BorderSizePixel = 0
+                                        presetsHolder.ZIndex = 32
+                                        presetsHolder.Parent = pickerPanel
+
+                                        local presetsLayout = Instance.new("UIListLayout")
+                                        presetsLayout.FillDirection = Enum.FillDirection.Horizontal
+                                        presetsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                                        presetsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                                        presetsLayout.Padding = UDim.new(0, 2)
+                                        presetsLayout.Parent = presetsHolder
+
+                                        local colorPresets = {
+                                                Color3.fromRGB(255, 255, 255),
+                                                Color3.fromRGB(150, 150, 150),
+                                                Color3.fromRGB(25, 25, 25),
+                                                Color3.fromRGB(255, 64, 64),
+                                                Color3.fromRGB(255, 200, 50),
+                                                Color3.fromRGB(80, 220, 120),
+                                                Color3.fromRGB(0, 180, 255),
+                                                Color3.fromRGB(160, 100, 255),
+                                        }
+
+                                        for presetIndex, presetColor in ipairs(colorPresets) do
+                                                local presetButton = Instance.new("TextButton")
+                                                presetButton.Size = UDim2.fromOffset(19, 19)
+                                                presetButton.BackgroundColor3 = presetColor
+                                                presetButton.BorderSizePixel = 0
+                                                presetButton.AutoButtonColor = false
+                                                presetButton.Text = ""
+                                                presetButton.LayoutOrder = presetIndex
+                                                presetButton.ZIndex = 33
+                                                presetButton.Parent = presetsHolder
+                                                add_corner(presetButton, 5)
+                                                local presetStroke = add_stroke(presetButton, Color3.fromRGB(255, 255, 255), 0.82)
+                                                presetStroke:SetAttribute("KazeGuard", true)
+
+                                                presetButton.MouseButton1Click:Connect(function()
+                                                        set_color(Color3.toHSV(presetColor))
+                                                        Config:save(game.GameId, Library._config)
+                                                end)
+                                        end
+
+                                        pickerField.MouseButton1Down:Connect(function()
+                                                begin_drag(update_field, pickerField)
+                                        end)
+
+                                        pickerHueBar.MouseButton1Down:Connect(function()
+                                                begin_drag(update_hue, pickerHueBar)
+                                        end)
+
+                                        pickerPanel.AutoLocalize = false
+
+                                        for _, descendant in ipairs(pickerPanel:GetDescendants()) do
+                                                if descendant:IsA("GuiBase2d") then
+                                                        descendant.AutoLocalize = false
+                                                end
+                                        end
+
+                                        return true
+                                end
+
+                                local function place_popup()
+                                        local root = window and window._ui and window._ui:FindFirstChild("Handler", true)
+
+                                        if not root then
+                                                return
+                                        end
+
+                                        local scale = 1
+
+                                        if typeof(window) == "table" and typeof(window._ui_scale) == "number" and window._ui_scale > 0 then
+                                                scale = window._ui_scale
+                                        end
+
+                                        local relativeX = (swatch.AbsolutePosition.X - root.AbsolutePosition.X) / scale
+                                        local relativeY = (swatch.AbsolutePosition.Y - root.AbsolutePosition.Y) / scale
+
+                                        pickerPanel.Position = UDim2.fromOffset(math.clamp(relativeX - 219, 8, WINDOW_W - 242), math.clamp(relativeY - 91, 8, WINDOW_H - 208))
+                                end
+
+                                local function close_popup()
+                                        if pickerPanel then
+                                                pickerPanel.Visible = false
+                                                pickerScale.Scale = 1
+                                        end
+
+                                        if outsideConnection then
+                                                outsideConnection:Disconnect()
+                                                outsideConnection = nil
+                                        end
+                                end
+
+                                local function open_popup()
+                                        if not pickerPanel then
+                                                if not build_picker() then
+                                                        return
+                                                end
+                                        end
+
+                                        if pickerPanel.Visible then
+                                                close_popup()
+
+                                                return
+                                        end
+
+                                        place_popup()
+                                        pickerPanel.Visible = true
+                                        pickerScale.Scale = 0.92
+                                        TweenService:Create(pickerScale, TweenInfo.new(0.18, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+
+                                        if not outsideConnection then
+                                                outsideConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                                                        if gameProcessed then
+                                                                return
+                                                        end
+
+                                                        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                                                                return
+                                                        end
+
+                                                        close_popup()
+                                                end)
+                                        end
+                                end
+
+                                rowButton.MouseButton1Click:Connect(function()
+                                        open_popup()
+                                end)
+
+                                if Library:flag_type(config.flag, "string") then
+                                        config.callback(currentColor)
+                                else
+                                        Library._config._flags [config.flag] = color_to_hex(currentColor)
+                                end
+
+                                element._holder = rowButton
+
+                                return element
                         end
 
                         module.create_slider = function(self, config)
@@ -4488,6 +5050,17 @@ do
         end
 
         VisualsTab = window:create_tab("Visuals", visualTabIcon)
+        local worldTabIcon = {Url = "rbxassetid://110684213241563", ImageRectSize = Vector2.new(24, 24), ImageRectOffset = Vector2.new(925, 950)}
+
+        do
+                local lucideWorldIcon = KazeIcons.get("earth") or KazeIcons.get("globe") or KazeIcons.get("mountain-snow")
+
+                if lucideWorldIcon then
+                        worldTabIcon = lucideWorldIcon
+                end
+        end
+
+        World = window:create_tab("World", worldTabIcon)
         Cosmetics = window:create_tab("Cosmetics", "rbxassetid://70433574792490")
         Misc = window:create_tab("Misc", "rbxassetid://106205298246017")
         local uiTabIcon = {Url = "rbxassetid://110684213241563", ImageRectSize = Vector2.new(24, 24), ImageRectOffset = Vector2.new(850, 950)}
@@ -7669,7 +8242,7 @@ do
         getgenv().sofactive = sofActive
 end
 
-local ball, Lighting
+local ball
 
 do
         do
@@ -11496,214 +12069,877 @@ local UserInputService = game:GetService("UserInputService")
                                 })
                         end
 
-                        Lighting = game:GetService("Lighting")
-                        value = false
-                        clone = nil
-
-                        do
-                                local sky = Lighting:FindFirstChildOfClass("Sky")
-
-                                if sky then
-                                        clone = sky:Clone()
-                                        sky:Destroy()
-                                end
-                        end
                 end
 
-                do
                         do
-                                Lighting.GlobalShadows = true
+                                kazeWorld = {
+                                        lighting_card = false,
+                                        removals_card = false,
+                                        sky_card = false,
+                                        cc_card = false,
+                                        dirty = false,
+                                        ambient = false,
+                                        ambient_color = Color3.fromRGB(150, 150, 150),
+                                        outdoor = false,
+                                        outdoor_color = Color3.fromRGB(120, 120, 140),
+                                        brightness = false,
+                                        brightness_value = 2,
+                                        clocktime = false,
+                                        clocktime_value = 14,
+                                        fog = false,
+                                        fog_color = Color3.fromRGB(160, 160, 180),
+                                        fog_start = 0,
+                                        fog_end = 1000,
+                                        shadows = false,
+                                        shadow_softness = 0.5,
+                                        exposure = false,
+                                        exposure_value = 0,
+                                        technology = false,
+                                        technology_mode = "Future",
+                                        skybox = false,
+                                        skybox_preset = "Synthwave",
+                                        sky_rotate = false,
+                                        sky_rotate_speed = 100,
+                                        atmosphere = false,
+                                        atmosphere_color = Color3.fromRGB(199, 170, 107),
+                                        atmosphere_decay = Color3.fromRGB(106, 112, 125),
+                                        atmosphere_density = 0.3,
+                                        atmosphere_haze = 1,
+                                        atmosphere_glare = 0,
+                                        no_textures = false,
+                                        no_fog = false,
+                                        anti_shake = false,
+                                        third_person = false,
+                                        cc = false,
+                                        tint_color = Color3.fromRGB(255, 255, 255),
+                                        cc_saturation = 0,
+                                        cc_contrast = 0,
+                                        cc_brightness = 0,
+                                }
 
-                                do
-                                        local data = {
-                                                Piss = {
-                                                        SkyboxUp = "rbxassetid://2651437350",
-                                                        SkyboxRt = "rbxassetid://2651436979",
-                                                        SkyboxLf = "rbxassetid://2651436494",
-                                                        SkyboxFt = "rbxassetid://2651435990",
-                                                        SkyboxBk = "rbxassetid://2651432901",
-                                                        SkyboxDn = "rbxassetid://2651434974",
-                                                },
-                                                Peach = {
-                                                        SkyboxUp = "rbxassetid://566616187",
-                                                        SkyboxRt = "rbxassetid://566616082",
-                                                        SkyboxLf = "rbxassetid://566616044",
-                                                        SkyboxFt = "rbxassetid://566616141",
-                                                        SkyboxBk = "rbxassetid://566616113",
-                                                        SkyboxDn = "rbxassetid://566616232",
-                                                },
-                                                Saku = {
-                                                        SkyboxUp = "http://www.roblox.com/asset/?id=271077958",
-                                                        SkyboxRt = "http://www.roblox.com/asset/?id=271042467",
-                                                        SkyboxLf = "http://www.roblox.com/asset/?id=271042310",
-                                                        SkyboxFt = "http://www.roblox.com/asset/?id=271042556",
-                                                        SkyboxBk = "http://www.roblox.com/asset/?id=271042516",
-                                                        SkyboxDn = "http://www.roblox.com/asset/?id=271077243",
-                                                },
-                                                Purple = {
-                                                        SkyboxUp = "http://www.roblox.com/asset/?id=570557727",
-                                                        SkyboxRt = "http://www.roblox.com/asset/?id=570557672",
-                                                        SkyboxLf = "http://www.roblox.com/asset/?id=570557620",
-                                                        SkyboxFt = "http://www.roblox.com/asset/?id=570557559",
-                                                        SkyboxBk = "http://www.roblox.com/asset/?id=570557514",
-                                                        SkyboxDn = "http://www.roblox.com/asset/?id=570557775",
-                                                },
-                                                Retro = {
-                                                        SkyboxUp = "rbxassetid://18164890128",
-                                                        SkyboxRt = "rbxassetid://18164873920",
-                                                        SkyboxLf = "rbxassetid://18164877945",
-                                                        SkyboxFt = "rbxassetid://18164870251",
-                                                        SkyboxBk = "rbxassetid://18164881924",
-                                                        SkyboxDn = "rbxassetid://18166113875",
-                                                },
-                                                Space = {
-                                                        SkyboxUp = "rbxassetid://15983964246",
-                                                        SkyboxRt = "rbxassetid://15983966246",
-                                                        SkyboxLf = "rbxassetid://15983967420",
-                                                        SkyboxFt = "rbxassetid://15983965025",
-                                                        SkyboxBk = "rbxassetid://15983968922",
-                                                        SkyboxDn = "rbxassetid://15983966825",
-                                                },
-                                                Sea = {
-                                                        SkyboxUp = "http://www.roblox.com/asset/?id=321846070",
-                                                        SkyboxRt = "http://www.roblox.com/asset/?id=321846207",
-                                                        SkyboxLf = "http://www.roblox.com/asset/?id=321846162",
-                                                        SkyboxFt = "http://www.roblox.com/asset/?id=321845951",
-                                                        SkyboxBk = "http://www.roblox.com/asset/?id=321846018",
-                                                        SkyboxDn = "http://www.roblox.com/asset/?id=321846104",
-                                                },
-                                                ["Night"] = {
-                                                        SkyboxUp = "http://www.roblox.com/Asset/?ID=12064131",
-                                                        SkyboxRt = "http://www.roblox.com/Asset/?ID=12064115",
-                                                        SkyboxLf = "http://www.roblox.com/Asset/?ID=12063984",
-                                                        SkyboxFt = "http://www.roblox.com/Asset/?ID=12064121",
-                                                        SkyboxBk = "http://www.roblox.com/Asset/?ID=12064107",
-                                                        SkyboxDn = "http://www.roblox.com/Asset/?ID=12064152",
-                                                },
-                                                Dark = {
-                                                        SkyboxUp = "rbxassetid://15470160563",
-                                                        SkyboxRt = "rbxassetid://15470158022",
-                                                        SkyboxLf = "rbxassetid://15470155938",
-                                                        SkyboxFt = "rbxassetid://15470153860",
-                                                        SkyboxBk = "rbxassetid://15470149279",
-                                                        SkyboxDn = "rbxassetid://15470151245",
-                                                },
-                                                Anime = {
-                                                        SkyboxUp = "http://www.roblox.com/asset/?id=104038404823203",
-                                                        SkyboxRt = "http://www.roblox.com/asset/?id=99961685452126",
-                                                        SkyboxLf = "http://www.roblox.com/asset/?id=84924000207295",
-                                                        SkyboxFt = "http://www.roblox.com/asset/?id=95687237979398",
-                                                        SkyboxBk = "http://www.roblox.com/asset/?id=81858382098344",
-                                                        SkyboxDn = "http://www.roblox.com/asset/?id=138472117789684",
-                                                },
-                                                Beach = {
-                                                        SkyboxUp = "http://www.roblox.com/asset/?id=151165227",
-                                                        SkyboxRt = "http://www.roblox.com/asset/?id=151165206",
-                                                        SkyboxLf = "http://www.roblox.com/asset/?id=151165191",
-                                                        SkyboxFt = "http://www.roblox.com/asset/?id=151165224",
-                                                        SkyboxBk = "http://www.roblox.com/asset/?id=151165214",
-                                                        SkyboxDn = "http://www.roblox.com/asset/?id=151165197",
-                                                },
-                                                Pink = {
-                                                        SkyboxUp = "rbxassetid://12635316856",
-                                                        SkyboxRt = "rbxassetid://12635315817",
-                                                        SkyboxLf = "rbxassetid://12635313718",
-                                                        SkyboxFt = "rbxassetid://12635312870",
-                                                        SkyboxBk = "rbxassetid://12635309703",
-                                                        SkyboxDn = "rbxassetid://12635311686",
-                                                },
-                                                Rainbow = {
-                                                        SkyboxUp = "rbxassetid://12877083856",
-                                                        SkyboxRt = "rbxassetid://12877085497",
-                                                        SkyboxLf = "rbxassetid://12877085497",
-                                                        SkyboxFt = "rbxassetid://12877085497",
-                                                        SkyboxBk = "rbxassetid://12877085497",
-                                                        SkyboxDn = "rbxassetid://12877086914",
-                                                },
-                                                Lucid = {
-                                                        SkyboxUp = "rbxassetid://8508112781",
-                                                        SkyboxRt = "rbxassetid://8508111092",
-                                                        SkyboxLf = "rbxassetid://8508107681",
-                                                        SkyboxFt = "rbxassetid://8508104949",
-                                                        SkyboxBk = "rbxassetid://8508098796",
-                                                        SkyboxDn = "rbxassetid://8508103588",
-                                                },
-                                                Nebulous = {
-                                                        SkyboxUp = "rbxassetid://131036626982613",
-                                                        SkyboxRt = "rbxassetid://103716549795832",
-                                                        SkyboxLf = "rbxassetid://126542804346203",
-                                                        SkyboxFt = "rbxassetid://107665368823185",
-                                                        SkyboxBk = "rbxassetid://95020137072033",
-                                                        SkyboxDn = "rbxassetid://92862258103959",
-                                                },
-                                        }
+                                local originalLighting = {
+                                        Ambient = Lighting.Ambient,
+                                        OutdoorAmbient = Lighting.OutdoorAmbient,
+                                        FogColor = Lighting.FogColor,
+                                        FogStart = Lighting.FogStart,
+                                        FogEnd = Lighting.FogEnd,
+                                        Brightness = Lighting.Brightness,
+                                        ClockTime = Lighting.ClockTime,
+                                        GlobalShadows = Lighting.GlobalShadows,
+                                        ShadowSoftness = Lighting.ShadowSoftness,
+                                        ExposureCompensation = Lighting.ExposureCompensation,
+                                }
 
-                                        local function value()
-                                                local list = {}
+                                local originalSkybox = Lighting:FindFirstChildOfClass("Sky")
+                                local activeSkybox = nil
+                                local strippedTextures = {}
+                                local textureConnection = nil
 
-                                                for k in pairs(data) do
-                                                        table.insert(list, k)
+                                if originalSkybox then
+                                        originalSkybox = originalSkybox:Clone()
+                                end
+
+                                local skyboxPresets = {
+                                        Synthwave = {
+                                                SkyboxUp = "rbxassetid://16642401907", SkyboxDn = "rbxassetid://16642397027",
+                                                SkyboxBk = "rbxassetid://16642396302", SkyboxFt = "rbxassetid://16642398372",
+                                                SkyboxLf = "rbxassetid://16642399309", SkyboxRt = "rbxassetid://16642400745",
+                                        },
+                                        ["Purple Nebula"] = {
+                                                SkyboxUp = "rbxassetid://5084576400", SkyboxDn = "rbxassetid://5260653793",
+                                                SkyboxFt = "rbxassetid://5260817288", SkyboxBk = "rbxassetid://5260808177",
+                                                SkyboxLf = "rbxassetid://5260800833", SkyboxRt = "rbxassetid://5260800833",
+                                        },
+                                        Vaporwave = {
+                                                SkyboxUp = "rbxassetid://14164405298", SkyboxDn = "rbxassetid://14164386126",
+                                                SkyboxFt = "rbxassetid://14164389230", SkyboxBk = "rbxassetid://14164368678",
+                                                SkyboxLf = "rbxassetid://14164398493", SkyboxRt = "rbxassetid://14164402782",
+                                        },
+                                        ["Night Sky"] = {
+                                                SkyboxUp = "rbxassetid://2670644331", SkyboxDn = "rbxassetid://2670643365",
+                                                SkyboxFt = "rbxassetid://2670643214", SkyboxBk = "rbxassetid://2670643994",
+                                                SkyboxLf = "rbxassetid://2670643070", SkyboxRt = "rbxassetid://2670644173",
+                                        },
+                                        ["Red Galaxy"] = {
+                                                SkyboxUp = "rbxassetid://14365019327", SkyboxDn = "rbxassetid://14365023350",
+                                                SkyboxBk = "rbxassetid://14365019002", SkyboxFt = "rbxassetid://14365018399",
+                                                SkyboxLf = "rbxassetid://14365018705", SkyboxRt = "rbxassetid://14365018143",
+                                        },
+                                        Sunset = {
+                                                SkyboxUp = "rbxassetid://415688354", SkyboxDn = "rbxassetid://415688193",
+                                                SkyboxBk = "rbxassetid://415688378", SkyboxFt = "rbxassetid://415688242",
+                                                SkyboxLf = "rbxassetid://415688310", SkyboxRt = "rbxassetid://415688274",
+                                        },
+                                        GreenHaze = {
+                                                SunAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://160193458", SkyboxDn = "rbxassetid://160193466",
+                                                SkyboxFt = "rbxassetid://160193461", SkyboxBk = "rbxassetid://160193404",
+                                                SkyboxLf = "rbxassetid://160193469", SkyboxRt = "rbxassetid://160193463",
+                                        },
+                                        Space2 = {
+                                                StarCount = 3000, SunAngularSize = 11, MoonAngularSize = 20,
+                                                SkyboxUp = "rbxassetid://11844053742", SkyboxDn = "rbxassetid://11844069700",
+                                                SkyboxFt = "rbxassetid://11844067209", SkyboxBk = "rbxassetid://11844076072",
+                                                SkyboxLf = "rbxassetid://11844063543", SkyboxRt = "rbxassetid://11844058446",
+                                        },
+                                        PinkMountains = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://160188588", SkyboxDn = "rbxassetid://160188614",
+                                                SkyboxFt = "rbxassetid://160188609", SkyboxBk = "rbxassetid://160188495",
+                                                SkyboxLf = "rbxassetid://160188589", SkyboxRt = "rbxassetid://160188597",
+                                        },
+                                        Valentines = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://11427771954", SkyboxDn = "rbxassetid://11427770685",
+                                                SkyboxFt = "rbxassetid://11427769401", SkyboxBk = "rbxassetid://11427769401",
+                                                SkyboxLf = "rbxassetid://11427769401", SkyboxRt = "rbxassetid://11427769401",
+                                        },
+                                        PinkArt = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://79190209626172", SkyboxDn = "rbxassetid://78865378050055",
+                                                SkyboxFt = "rbxassetid://104560113223878", SkyboxBk = "rbxassetid://71607054149497",
+                                                SkyboxLf = "rbxassetid://80395333901607", SkyboxRt = "rbxassetid://87570388049514",
+                                        },
+                                        PurplePlanet = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://16262366016", SkyboxDn = "rbxassetid://16262358026",
+                                                SkyboxFt = "rbxassetid://16262360469", SkyboxBk = "rbxassetid://16262356578",
+                                                SkyboxLf = "rbxassetid://16262362003", SkyboxRt = "rbxassetid://16262363873",
+                                        },
+                                        Blizzard = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://16653228333", SkyboxDn = "rbxassetid://16653222701",
+                                                SkyboxFt = "rbxassetid://16653224051", SkyboxBk = "rbxassetid://16653221738",
+                                                SkyboxLf = "rbxassetid://16653225849", SkyboxRt = "rbxassetid://16653227200",
+                                        },
+                                        Winter = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
+                                                SkyboxUp = "rbxassetid://155674931", SkyboxDn = "rbxassetid://155674246",
+                                                SkyboxFt = "rbxassetid://155657609", SkyboxBk = "rbxassetid://155657655",
+                                                SkyboxLf = "rbxassetid://155657671", SkyboxRt = "rbxassetid://155657619",
+                                        },
+                                        FlamingSunset = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://415688354", SkyboxDn = "rbxassetid://415688193",
+                                                SkyboxFt = "rbxassetid://415688242", SkyboxBk = "rbxassetid://415688378",
+                                                SkyboxLf = "rbxassetid://415688310", SkyboxRt = "rbxassetid://415688274",
+                                        },
+                                        Mountains = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://15359412677", SkyboxDn = "rbxassetid://15359411132",
+                                                SkyboxFt = "rbxassetid://15359412131", SkyboxBk = "rbxassetid://15359410490",
+                                                SkyboxLf = "rbxassetid://15359411633", SkyboxRt = "rbxassetid://15359417656",
+                                        },
+                                        FPSBoost = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://11457548274", SkyboxDn = "rbxassetid://11457548274",
+                                                SkyboxFt = "rbxassetid://11457548274", SkyboxBk = "rbxassetid://11457548274",
+                                                SkyboxLf = "rbxassetid://11457548274", SkyboxRt = "rbxassetid://11457548274",
+                                        },
+                                        AestheticMountains = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 11,
+                                                SkyboxUp = "rbxassetid://15470207755", SkyboxDn = "rbxassetid://15470151245",
+                                                SkyboxFt = "rbxassetid://15470200128", SkyboxBk = "rbxassetid://15470198023",
+                                                SkyboxLf = "rbxassetid://15470202648", SkyboxRt = "rbxassetid://15470204862",
+                                        },
+                                        BetterNight3 = {
+                                                StarCount = 500, SunAngularSize = 21, MoonAngularSize = 1.5,
+                                                SkyboxUp = "rbxassetid://2670644331", SkyboxDn = "rbxassetid://2670643365",
+                                                SkyboxFt = "rbxassetid://2670643214", SkyboxBk = "rbxassetid://2670643994",
+                                                SkyboxLf = "rbxassetid://2670643070", SkyboxRt = "rbxassetid://2670644173",
+                                        },
+                                        Galaxy2 = {
+                                                StarCount = 500, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://14164405298", SkyboxDn = "rbxassetid://14164386126",
+                                                SkyboxFt = "rbxassetid://14164389230", SkyboxBk = "rbxassetid://14164368678",
+                                                SkyboxLf = "rbxassetid://14164398493", SkyboxRt = "rbxassetid://14164402782",
+                                        },
+                                        Aesthetic3 = {
+                                                StarCount = 500, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://151165227", SkyboxDn = "rbxassetid://151165197",
+                                                SkyboxFt = "rbxassetid://151165224", SkyboxBk = "rbxassetid://151165214",
+                                                SkyboxLf = "rbxassetid://151165191", SkyboxRt = "rbxassetid://151165206",
+                                        },
+                                        PurpleSpace = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://15983964246", SkyboxDn = "rbxassetid://15983966825",
+                                                SkyboxFt = "rbxassetid://5260817288", SkyboxBk = "rbxassetid://15983968922",
+                                                SkyboxLf = "rbxassetid://15983967420", SkyboxRt = "rbxassetid://15983966246",
+                                        },
+                                        Pink = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://271077958", SkyboxDn = "rbxassetid://271077243",
+                                                SkyboxFt = "rbxassetid://271042556", SkyboxBk = "rbxassetid://271042516",
+                                                SkyboxLf = "rbxassetid://271042310", SkyboxRt = "rbxassetid://271042467",
+                                        },
+                                        PurpleNight = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://5084576400", SkyboxDn = "rbxassetid://5260653793",
+                                                SkyboxFt = "rbxassetid://5260817288", SkyboxBk = "rbxassetid://5260808177",
+                                                SkyboxLf = "rbxassetid://5260800833", SkyboxRt = "rbxassetid://5260800833",
+                                        },
+                                        Flame = {
+                                                StarCount = 3000, SunAngularSize = 21, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://6286790025", SkyboxDn = "rbxassetid://6286782353",
+                                                SkyboxFt = "rbxassetid://6286784186", SkyboxBk = "rbxassetid://6286780109",
+                                                SkyboxLf = "rbxassetid://6286785801", SkyboxRt = "rbxassetid://6286788245",
+                                        },
+                                        Galaxy3 = {
+                                                StarCount = 3000, SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://14543371676", SkyboxDn = "rbxassetid://14543358958",
+                                                SkyboxFt = "rbxassetid://14543257810", SkyboxBk = "rbxassetid://14543264135",
+                                                SkyboxLf = "rbxassetid://14543275895", SkyboxRt = "rbxassetid://14543280890",
+                                        },
+                                        Storm = {
+                                                SunAngularSize = 0, MoonAngularSize = 0,
+                                                SkyboxUp = "rbxassetid://1618913654", SkyboxDn = "rbxassetid://1618913943",
+                                                SkyboxFt = "rbxassetid://1618913244", SkyboxBk = "rbxassetid://1618912481",
+                                                SkyboxLf = "rbxassetid://1618912849", SkyboxRt = "rbxassetid://1618911568",
+                                        },
+                                        ["Deep Space"] = {
+                                                SkyboxUp = "rbxassetid://15983964246", SkyboxDn = "rbxassetid://15983966825",
+                                                SkyboxFt = "rbxassetid://5260817288", SkyboxBk = "rbxassetid://15983968922",
+                                                SkyboxLf = "rbxassetid://15983967420", SkyboxRt = "rbxassetid://15983966246",
+                                        },
+                                }
+
+                                local function kaze_apply_skybox()
+                                        if not (kazeWorld.skybox and kazeWorld.sky_card) then
+                                                if activeSkybox then
+                                                        pcall(function()
+                                                                activeSkybox:Destroy()
+                                                        end)
+                                                        activeSkybox = nil
                                                 end
 
-                                                table.sort(list)
-                                                return list
+                                                local currentSky = Lighting:FindFirstChildOfClass("Sky")
+
+                                                if currentSky and currentSky.Name == "_KazeSky" then
+                                                        pcall(function()
+                                                                currentSky:Destroy()
+                                                        end)
+                                                end
+
+                                                if originalSkybox and not Lighting:FindFirstChildOfClass("Sky") then
+                                                        originalSkybox:Clone().Parent = Lighting
+                                                end
+
+                                                return
                                         end
 
-                                        VisualsTab:create_module({
-                                                title = "Custom Sky",
-                                                flag = "Custom_Sky",
-                                                description = "Toggles a custom skybox",
-                                                section = "right",
-                                                callback = function(state)
-                                                        value = state
-                                                        local sky = Lighting:FindFirstChildOfClass("Sky")
+                                        local preset = skyboxPresets[kazeWorld.skybox_preset]
 
-                                                        if state then
-                                                                if not sky then
-                                                                        Instance.new("Sky").Parent = Lighting
-                                                                end
-                                                        else
-                                                                if sky then
-                                                                        sky:Destroy()
-                                                                end
+                                        if not preset then
+                                                return
+                                        end
 
-                                                                if clone then
-                                                                        clone:Clone().Parent = Lighting
-                                                                end
+                                        if not activeSkybox or not activeSkybox.Parent then
+                                                local oldSky = Lighting:FindFirstChildOfClass("Sky")
 
-                                                                Lighting.GlobalShadows = true
-                                                        end
-                                                end,
-                                        }):create_dropdown({
-                                                title = "Select Sky",
-                                                flag = "custom_sky_selector",
-                                                multi_dropdown = false,
-                                                maximum_options = 15,
-                                                options = value(),
-                                                callback = function(state)
-                                                        if not value then
-                                                                return
-                                                        end
+                                                if oldSky and oldSky.Name ~= "_KazeSky" then
+                                                        originalSkybox = oldSky:Clone()
+                                                        oldSky.Parent = nil
+                                                end
 
-                                                        local sky = Lighting:FindFirstChildOfClass("Sky")
-                                                        if not sky then
-                                                                return
-                                                        end
-                                                        local value = data [state]
-                                                        if not value then
-                                                                return
-                                                        end
+                                                local newSky = Instance.new("Sky")
+                                                newSky.Name = "_KazeSky"
+                                                newSky.Parent = Lighting
+                                                activeSkybox = newSky
+                                        end
 
-                                                        for k, value in pairs(value) do
-                                                                sky [k] = value
-                                                        end
-
-                                                        Lighting.GlobalShadows = false
-                                                        return
-
-                                                end,
-                                        })
+                                        for prop, value in pairs(preset) do
+                                                pcall(function()
+                                                        activeSkybox[prop] = value
+                                                end)
+                                        end
                                 end
+
+                                local function kaze_strip_textures()
+                                        for _, obj in ipairs(workspace:GetDescendants()) do
+                                                if obj:IsA("Texture") or obj:IsA("Decal") then
+                                                        if strippedTextures[obj] == nil then
+                                                                strippedTextures[obj] = obj.Transparency
+                                                                pcall(function()
+                                                                        obj.Transparency = 1
+                                                                end)
+                                                        end
+                                                end
+                                        end
+                                end
+
+                                local function kaze_restore_textures()
+                                        for obj, origTrans in pairs(strippedTextures) do
+                                                if obj and obj.Parent then
+                                                        pcall(function()
+                                                                obj.Transparency = origTrans
+                                                        end)
+                                                end
+                                        end
+
+                                        table.clear(strippedTextures)
+                                end
+
+                                moduleConnections ["World Engine"] = RunService.Heartbeat:Connect(function(dt)
+                                        if not (kazeWorld.lighting_card or kazeWorld.removals_card or kazeWorld.sky_card or kazeWorld.cc_card or kazeWorld.dirty) then
+                                                return
+                                        end
+
+                                        kazeWorld.dirty = false
+                                        local lightingOn = kazeWorld.lighting_card
+
+                                        if kazeWorld.ambient and lightingOn then
+                                                Lighting.Ambient = kazeWorld.ambient_color
+                                        else
+                                                Lighting.Ambient = originalLighting.Ambient
+                                        end
+
+                                        if kazeWorld.outdoor and lightingOn then
+                                                Lighting.OutdoorAmbient = kazeWorld.outdoor_color
+                                        else
+                                                Lighting.OutdoorAmbient = originalLighting.OutdoorAmbient
+                                        end
+
+                                        if kazeWorld.brightness and lightingOn then
+                                                Lighting.Brightness = kazeWorld.brightness_value
+                                        else
+                                                Lighting.Brightness = originalLighting.Brightness
+                                        end
+
+                                        if kazeWorld.clocktime and lightingOn then
+                                                Lighting.ClockTime = kazeWorld.clocktime_value
+                                        elseif not (kazeWorld.sky_rotate and kazeWorld.sky_card) then
+                                                Lighting.ClockTime = originalLighting.ClockTime
+                                        end
+
+                                        if kazeWorld.fog and lightingOn then
+                                                Lighting.FogColor = kazeWorld.fog_color
+                                                Lighting.FogStart = kazeWorld.fog_start
+                                                Lighting.FogEnd = kazeWorld.fog_end
+                                        elseif kazeWorld.no_fog and kazeWorld.removals_card then
+                                                Lighting.FogStart = 0
+                                                Lighting.FogEnd = 1000000
+                                        else
+                                                Lighting.FogColor = originalLighting.FogColor
+                                                Lighting.FogStart = originalLighting.FogStart
+                                                Lighting.FogEnd = originalLighting.FogEnd
+                                        end
+
+                                        if kazeWorld.shadows and lightingOn then
+                                                Lighting.GlobalShadows = true
+                                                Lighting.ShadowSoftness = kazeWorld.shadow_softness
+                                        else
+                                                Lighting.GlobalShadows = originalLighting.GlobalShadows
+                                                Lighting.ShadowSoftness = originalLighting.ShadowSoftness
+                                        end
+
+                                        if kazeWorld.exposure and lightingOn then
+                                                Lighting.ExposureCompensation = kazeWorld.exposure_value
+                                        else
+                                                Lighting.ExposureCompensation = originalLighting.ExposureCompensation
+                                        end
+
+                                        if kazeWorld.technology and lightingOn then
+                                                pcall(function()
+                                                        if Enum.Technology[kazeWorld.technology_mode] then
+                                                                Lighting.Technology = Enum.Technology[kazeWorld.technology_mode]
+                                                        end
+                                                end)
+                                        end
+
+                                        if kazeWorld.sky_rotate and kazeWorld.sky_card then
+                                                local rotateSpeed = (kazeWorld.sky_rotate_speed or 100) / 100
+                                                Lighting.ClockTime = (Lighting.ClockTime + (dt * rotateSpeed)) % 24
+                                        end
+
+                                        if kazeWorld.atmosphere and kazeWorld.sky_card then
+                                                local atmosphere = Lighting:FindFirstChild("_KazeAtmosphere")
+
+                                                if not atmosphere then
+                                                        atmosphere = Instance.new("Atmosphere")
+                                                        atmosphere.Name = "_KazeAtmosphere"
+                                                        atmosphere.Parent = Lighting
+                                                end
+
+                                                atmosphere.Color = kazeWorld.atmosphere_color
+                                                atmosphere.Decay = kazeWorld.atmosphere_decay
+                                                atmosphere.Density = kazeWorld.atmosphere_density
+                                                atmosphere.Haze = kazeWorld.atmosphere_haze
+                                                atmosphere.Glare = kazeWorld.atmosphere_glare
+                                        else
+                                                local atmosphere = Lighting:FindFirstChild("_KazeAtmosphere")
+
+                                                if atmosphere then
+                                                        pcall(function()
+                                                                atmosphere:Destroy()
+                                                        end)
+                                                end
+                                        end
+
+                                        if kazeWorld.cc and kazeWorld.cc_card then
+                                                local correction = Lighting:FindFirstChild("_KazeColorCorrection")
+
+                                                if not correction then
+                                                        correction = Instance.new("ColorCorrectionEffect")
+                                                        correction.Name = "_KazeColorCorrection"
+                                                        correction.Parent = Lighting
+                                                end
+
+                                                correction.TintColor = kazeWorld.tint_color
+                                                correction.Saturation = kazeWorld.cc_saturation
+                                                correction.Contrast = kazeWorld.cc_contrast
+                                                correction.Brightness = kazeWorld.cc_brightness
+                                                correction.Enabled = true
+                                        else
+                                                local correction = Lighting:FindFirstChild("_KazeColorCorrection")
+
+                                                if correction then
+                                                        correction.Enabled = false
+                                                end
+                                        end
+
+                                        if kazeWorld.no_textures and kazeWorld.removals_card then
+                                                if not textureConnection then
+                                                        kaze_strip_textures()
+
+                                                        textureConnection = workspace.DescendantAdded:Connect(function(obj)
+                                                                if obj:IsA("Texture") or obj:IsA("Decal") then
+                                                                        strippedTextures[obj] = obj.Transparency
+                                                                        pcall(function()
+                                                                                obj.Transparency = 1
+                                                                        end)
+                                                                end
+                                                        end)
+                                                end
+                                        elseif textureConnection then
+                                                textureConnection:Disconnect()
+                                                textureConnection = nil
+                                                kaze_restore_textures()
+                                        end
+
+                                        local camera = workspace.CurrentCamera
+
+                                        if kazeWorld.third_person and kazeWorld.removals_card then
+                                                pcall(function()
+                                                        if Players.LocalPlayer and Players.LocalPlayer.CameraMode ~= Enum.CameraMode.Classic then
+                                                                Players.LocalPlayer.CameraMode = Enum.CameraMode.Classic
+                                                        end
+                                                end)
+                                        end
+
+                                        if kazeWorld.anti_shake and kazeWorld.removals_card then
+                                                pcall(function()
+                                                        local shake = camera and (camera:FindFirstChild("CameraShake") or camera:FindFirstChild("Shake"))
+
+                                                        if shake then
+                                                                shake:Destroy()
+                                                        end
+                                                end)
+                                        end
+                                end)
+
+                                local worldLighting = World:create_module({
+                                        title = "World Lighting",
+                                        flag = "World_Lighting",
+                                        description = "Tune the lighting of the world around you",
+                                        section = "left",
+                                        callback = function(state)
+                                                kazeWorld.lighting_card = state == true
+                                                kazeWorld.dirty = true
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Ambient Override",
+                                        flag = "World_Ambient",
+                                        callback = function(state)
+                                                kazeWorld.ambient = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_colorpicker({
+                                        title = "Ambient Color",
+                                        flag = "World_Ambient_Color",
+                                        color = Color3.fromRGB(150, 150, 150),
+                                        callback = function(color)
+                                                kazeWorld.ambient_color = color
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Outdoor Ambient Override",
+                                        flag = "World_Outdoor_Ambient",
+                                        callback = function(state)
+                                                kazeWorld.outdoor = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_colorpicker({
+                                        title = "Outdoor Color",
+                                        flag = "World_Outdoor_Color",
+                                        color = Color3.fromRGB(120, 120, 140),
+                                        callback = function(color)
+                                                kazeWorld.outdoor_color = color
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Override Brightness",
+                                        flag = "World_Brightness",
+                                        callback = function(state)
+                                                kazeWorld.brightness = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Brightness Value",
+                                        flag = "World_Brightness_Value",
+                                        minimum_value = 0,
+                                        maximum_value = 10,
+                                        value = 2,
+                                        callback = function(amount)
+                                                kazeWorld.brightness_value = amount
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Override Time (ClockTime)",
+                                        flag = "World_ClockTime",
+                                        callback = function(state)
+                                                kazeWorld.clocktime = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Time of Day",
+                                        flag = "World_ClockTime_Value",
+                                        minimum_value = 0,
+                                        maximum_value = 24,
+                                        value = 14,
+                                        round_number = true,
+                                        callback = function(amount)
+                                                kazeWorld.clocktime_value = amount
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Custom Fog Modulation",
+                                        flag = "World_Fog",
+                                        callback = function(state)
+                                                kazeWorld.fog = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_colorpicker({
+                                        title = "Fog Color",
+                                        flag = "World_Fog_Color",
+                                        color = Color3.fromRGB(160, 160, 180),
+                                        callback = function(color)
+                                                kazeWorld.fog_color = color
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Fog Start Distance",
+                                        flag = "World_Fog_Start",
+                                        minimum_value = 0,
+                                        maximum_value = 500,
+                                        value = 0,
+                                        round_number = true,
+                                        callback = function(amount)
+                                                kazeWorld.fog_start = amount
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Fog End Distance",
+                                        flag = "World_Fog_End",
+                                        minimum_value = 50,
+                                        maximum_value = 3000,
+                                        value = 1000,
+                                        round_number = true,
+                                        callback = function(amount)
+                                                kazeWorld.fog_end = amount
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Global Shadows",
+                                        flag = "World_Shadows",
+                                        callback = function(state)
+                                                kazeWorld.shadows = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Shadow Softness",
+                                        flag = "World_Shadow_Softness",
+                                        minimum_value = 0,
+                                        maximum_value = 1,
+                                        value = 0.5,
+                                        callback = function(amount)
+                                                kazeWorld.shadow_softness = amount
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Exposure Compensation",
+                                        flag = "World_Exposure",
+                                        callback = function(state)
+                                                kazeWorld.exposure = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_slider({
+                                        title = "Exposure Value",
+                                        flag = "World_Exposure_Value",
+                                        minimum_value = -3,
+                                        maximum_value = 3,
+                                        value = 0,
+                                        callback = function(amount)
+                                                kazeWorld.exposure_value = amount
+                                        end,
+                                })
+
+                                worldLighting:create_checkbox({
+                                        title = "Lighting Technology",
+                                        flag = "World_Technology",
+                                        callback = function(state)
+                                                kazeWorld.technology = state == true
+                                        end,
+                                })
+
+                                worldLighting:create_dropdown({
+                                        title = "Technology Mode",
+                                        flag = "World_Technology_Mode",
+                                        options = { "Future", "ShadowMap", "Compatibility", "Voxel" },
+                                        multi_dropdown = false,
+                                        maximum_options = 4,
+                                        callback = function(mode)
+                                                kazeWorld.technology_mode = typeof(mode) == "string" and mode or "Future"
+                                        end,
+                                })
+
+                                local worldSkyAtmosphere = World:create_module({
+                                        title = "Skybox & Atmosphere",
+                                        flag = "World_Sky_Atmosphere",
+                                        description = "Change the sky and the air of the map",
+                                        section = "right",
+                                        callback = function(state)
+                                                kazeWorld.sky_card = state == true
+                                                kazeWorld.dirty = true
+                                                kaze_apply_skybox()
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_checkbox({
+                                        title = "Enable Skybox Override",
+                                        flag = "World_Skybox",
+                                        callback = function(state)
+                                                kazeWorld.skybox = state == true
+                                                kaze_apply_skybox()
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_dropdown({
+                                        title = "Skybox Preset",
+                                        flag = "World_Skybox_Preset",
+                                        options = {
+                                                "Synthwave", "Purple Nebula", "Vaporwave", "Night Sky", "Red Galaxy", "Sunset",
+                                                "GreenHaze", "Space2", "PinkMountains", "Valentines", "PinkArt", "PurplePlanet",
+                                                "Blizzard", "Winter", "FlamingSunset", "Mountains", "FPSBoost", "AestheticMountains",
+                                                "BetterNight3", "Galaxy2", "Aesthetic3", "PurpleSpace", "Pink", "PurpleNight",
+                                                "Flame", "Galaxy3", "Storm", "Deep Space"
+                                        },
+                                        multi_dropdown = false,
+                                        maximum_options = 10,
+                                        callback = function(preset)
+                                                kazeWorld.skybox_preset = typeof(preset) == "string" and preset or "Synthwave"
+                                                kaze_apply_skybox()
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_checkbox({
+                                        title = "Auto Rotate Sky (Day Cycle)",
+                                        flag = "World_Sky_Rotate",
+                                        callback = function(state)
+                                                kazeWorld.sky_rotate = state == true
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_slider({
+                                        title = "Sky Rotation Speed",
+                                        flag = "World_Sky_Speed",
+                                        minimum_value = 10,
+                                        maximum_value = 500,
+                                        value = 100,
+                                        round_number = true,
+                                        callback = function(amount)
+                                                kazeWorld.sky_rotate_speed = amount
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_checkbox({
+                                        title = "Atmosphere Changer",
+                                        flag = "World_Atmosphere",
+                                        callback = function(state)
+                                                kazeWorld.atmosphere = state == true
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_colorpicker({
+                                        title = "Atmosphere Color",
+                                        flag = "World_Atmosphere_Color",
+                                        color = Color3.fromRGB(199, 170, 107),
+                                        callback = function(color)
+                                                kazeWorld.atmosphere_color = color
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_colorpicker({
+                                        title = "Atmosphere Decay",
+                                        flag = "World_Atmosphere_Decay",
+                                        color = Color3.fromRGB(106, 112, 125),
+                                        callback = function(color)
+                                                kazeWorld.atmosphere_decay = color
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_slider({
+                                        title = "Atmosphere Density",
+                                        flag = "World_Atmosphere_Density",
+                                        minimum_value = 0,
+                                        maximum_value = 1,
+                                        value = 0.3,
+                                        callback = function(amount)
+                                                kazeWorld.atmosphere_density = amount
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_slider({
+                                        title = "Atmosphere Haze",
+                                        flag = "World_Atmosphere_Haze",
+                                        minimum_value = 0,
+                                        maximum_value = 10,
+                                        value = 1,
+                                        callback = function(amount)
+                                                kazeWorld.atmosphere_haze = amount
+                                        end,
+                                })
+
+                                worldSkyAtmosphere:create_slider({
+                                        title = "Atmosphere Glare",
+                                        flag = "World_Atmosphere_Glare",
+                                        minimum_value = 0,
+                                        maximum_value = 1,
+                                        value = 0,
+                                        callback = function(amount)
+                                                kazeWorld.atmosphere_glare = amount
+                                        end,
+                                })
+
+                                local worldColorCorrection = World:create_module({
+                                        title = "Color Correction",
+                                        flag = "World_Color_Correction",
+                                        description = "Post processing color effects",
+                                        section = "right",
+                                        callback = function(state)
+                                                kazeWorld.cc_card = state == true
+                                                kazeWorld.dirty = true
+                                        end,
+                                })
+
+                                worldColorCorrection:create_checkbox({
+                                        title = "Color Correction Effect",
+                                        flag = "World_CC",
+                                        callback = function(state)
+                                                kazeWorld.cc = state == true
+                                        end,
+                                })
+
+                                worldColorCorrection:create_colorpicker({
+                                        title = "Tint Color",
+                                        flag = "World_Tint_Color",
+                                        color = Color3.fromRGB(255, 255, 255),
+                                        callback = function(color)
+                                                kazeWorld.tint_color = color
+                                        end,
+                                })
+
+                                worldColorCorrection:create_slider({
+                                        title = "Color Saturation",
+                                        flag = "World_CC_Saturation",
+                                        minimum_value = -1,
+                                        maximum_value = 2,
+                                        value = 0,
+                                        callback = function(amount)
+                                                kazeWorld.cc_saturation = amount
+                                        end,
+                                })
+
+                                worldColorCorrection:create_slider({
+                                        title = "Color Contrast",
+                                        flag = "World_CC_Contrast",
+                                        minimum_value = -1,
+                                        maximum_value = 2,
+                                        value = 0,
+                                        callback = function(amount)
+                                                kazeWorld.cc_contrast = amount
+                                        end,
+                                })
+
+                                worldColorCorrection:create_slider({
+                                        title = "Color Brightness",
+                                        flag = "World_CC_Brightness",
+                                        minimum_value = -1,
+                                        maximum_value = 1,
+                                        value = 0,
+                                        callback = function(amount)
+                                                kazeWorld.cc_brightness = amount
+                                        end,
+                                })
+
+                                local worldRemovals = World:create_module({
+                                        title = "World Removals & Camera",
+                                        flag = "World_Removals",
+                                        description = "Strip the map and tweak the camera",
+                                        section = "left",
+                                        callback = function(state)
+                                                kazeWorld.removals_card = state == true
+                                                kazeWorld.dirty = true
+                                        end,
+                                })
+
+                                worldRemovals:create_checkbox({
+                                        title = "No Textures (Map Stripper)",
+                                        flag = "World_No_Textures",
+                                        callback = function(state)
+                                                kazeWorld.no_textures = state == true
+                                        end,
+                                })
+
+                                worldRemovals:create_checkbox({
+                                        title = "No Fog",
+                                        flag = "World_No_Fog",
+                                        callback = function(state)
+                                                kazeWorld.no_fog = state == true
+                                        end,
+                                })
+
+                                worldRemovals:create_checkbox({
+                                        title = "Anti-Screen Shake",
+                                        flag = "World_Anti_Shake",
+                                        callback = function(state)
+                                                kazeWorld.anti_shake = state == true
+                                        end,
+                                })
+
+                                worldRemovals:create_checkbox({
+                                        title = "Third Person POV",
+                                        flag = "World_Third_Person",
+                                        callback = function(state)
+                                                kazeWorld.third_person = state == true
+                                        end,
+                                })
                         end
 
                         do
@@ -12671,10 +13907,6 @@ local UserInputService = game:GetService("UserInputService")
                 end)
 
         end
-
-end
-
-local RunService, Players
 
 do
         do
@@ -16403,37 +17635,67 @@ do
         local fovModule = Player:create_module({
                 title = "Field of View",
                 flag = "Field_Of_View",
-                description = "Smooth zoom, presets & cinematic control",
+                description = "Smooth zoom, presets & speed-reactive motion FOV",
                 section = "left",
                 callback = function(state)
                         getgenv().CameraEnabled = state
 
                         if state then
+                                local camera = workspace.CurrentCamera
+
+                                if camera then
+                                        getgenv().KazeFovOriginal = camera.FieldOfView
+                                end
+
                                 getgenv().CameraFOV = getgenv().CameraFOV or 70
 
                                 if not moduleConnections ["FOV Loop"] then
-                                        moduleConnections ["FOV Loop"] = RunService.RenderStepped:Connect(function()
+                                        local fovKick = 0
+
+                                        moduleConnections ["FOV Loop"] = RunService.RenderStepped:Connect(function(dt)
                                                 local camera = workspace.CurrentCamera
 
-                                                if getgenv().CameraEnabled and camera then
-                                                        local target = getgenv().CameraFOV or 70
+                                                if not (getgenv().CameraEnabled and camera) then
+                                                        return
+                                                end
 
-                                                        if getgenv().FovSmooth then
-                                                                camera.FieldOfView = camera.FieldOfView + (target - camera.FieldOfView) * 0.12
-                                                        else
-                                                                camera.FieldOfView = target
+                                                local base = getgenv().CameraFOV or 70
+                                                local kick = 0
+
+                                                if getgenv().FovSpeedFX then
+                                                        local character = localPlayer.Character
+                                                        local root = character and character:FindFirstChild("HumanoidRootPart")
+
+                                                        if root then
+                                                                local velocity = root.AssemblyLinearVelocity
+                                                                local flatSpeed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+
+                                                                kick = math.clamp((flatSpeed - 30) / 70, 0, 1) * (getgenv().FovSpeedFXAmount or 12)
                                                         end
+                                                end
+
+                                                fovKick = fovKick + (kick - fovKick) * (1 - math.exp(-9 * dt))
+
+                                                local target = math.clamp(base + fovKick, 20, 150)
+
+                                                if getgenv().FovSmooth then
+                                                        local alpha = 1 - math.exp(-(getgenv().FovSpeed or 8) * dt)
+
+                                                        camera.FieldOfView = camera.FieldOfView + (target - camera.FieldOfView) * alpha
+                                                else
+                                                        camera.FieldOfView = target
                                                 end
                                         end)
                                 end
                         else
                                 local camera = workspace.CurrentCamera
+                                local restore = getgenv().KazeFovOriginal or 70
 
                                 if camera then
                                         if getgenv().FovSmooth then
-                                                TweenService:Create(camera, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { FieldOfView = 70 }):Play()
+                                                TweenService:Create(camera, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { FieldOfView = restore }):Play()
                                         else
-                                                camera.FieldOfView = 70
+                                                camera.FieldOfView = restore
                                         end
                                 end
 
@@ -16441,6 +17703,8 @@ do
                                         moduleConnections ["FOV Loop"]:Disconnect()
                                         moduleConnections ["FOV Loop"] = nil
                                 end
+
+                                getgenv().KazeFovOriginal = nil
                         end
                 end,
         })
@@ -16468,6 +17732,38 @@ do
         if Library._config._flags ["Camera_FOV_Smooth"] == nil then
                 smoothToggle:change_state(true)
         end
+
+        fovModule:create_slider({
+                title = "Transition Speed",
+                flag = "Camera_FOV_Speed",
+                minimum_value = 1,
+                maximum_value = 20,
+                value = 8,
+                round_number = true,
+                callback = function(state)
+                        getgenv().FovSpeed = state
+                end,
+        })
+
+        fovModule:create_checkbox({
+                title = "Speed FOV (Motion Zoom)",
+                flag = "Camera_FOV_SpeedFX",
+                callback = function(state)
+                        getgenv().FovSpeedFX = state
+                end,
+        })
+
+        fovModule:create_slider({
+                title = "Speed FOV Intensity",
+                flag = "Camera_FOV_SpeedFX_Amount",
+                minimum_value = 0,
+                maximum_value = 30,
+                value = 12,
+                round_number = true,
+                callback = function(state)
+                        getgenv().FovSpeedFXAmount = state
+                end,
+        })
 
         fovModule:create_dropdown({
                 title = "FOV Presets",
