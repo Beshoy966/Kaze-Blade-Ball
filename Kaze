@@ -1217,7 +1217,7 @@ Library.create_ui = function(self)
         local navBox = Instance.new("Frame")
         navBox.Name = "NavBox"
         navBox.Position = UDim2.new(0, 12, 0, 50)
-        navBox.Size = UDim2.new(0, 136, 0, 64)
+        navBox.Size = UDim2.new(0, 136, 1, -62)
         navBox.BackgroundColor3 = Theme.card
         navBox.BorderSizePixel = 0
         navBox.Parent = frame7
@@ -1814,7 +1814,6 @@ Library.create_ui = function(self)
                 uiPadding2.PaddingBottom = UDim.new(0, 12)
                 uiPadding2.Parent = scrollingFrame2
                 self._tab = self._tab + 1
-                navBox.Size = UDim2.new(0, 136, 0, 64 + self._tab * 28 + (self._tab - 1) * 4 + 8)
 
                 if isFirstTab then
                         self._active_tab_ref = textButton
@@ -6123,7 +6122,6 @@ do
                                 end
                         end
 
-                        spamCount = 0
                         parried = false
                         SelectedParryType = "Camera"
                         System = {}
@@ -6218,7 +6216,8 @@ do
                                 __connections = {},
                                 __auto_spam_enabled = false,
                                 __ability_esp_enabled = false,
-                                __spam_threshold = 2,
+                                __spam_threshold = 3,
+                                __spam_style = "Legit",
                                 __manual_spam_enabled = false,
                         }
 
@@ -6407,16 +6406,6 @@ do
                                 end
 
                                 animationDelayBypass = true
-
-                                if spamCount < 10 then
-                                        spamCount = spamCount + 1
-                                end
-
-                                task.delay(2, function()
-                                        if spamCount > 0 then
-                                                spamCount = spamCount - 1
-                                        end
-                                end)
 
                                 local humanoid = localPlayer.Character and localPlayer.Character:FindFirstChild("Humanoid")
                                 local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
@@ -6932,7 +6921,7 @@ do
                         lock = {
                                 Curving = 0,
                                 Lerp_Radians = 0,
-                                Last_Warping = tick(),
+                                Last_Warping = 0,
                                 Lol_Lerp_Radians = 0,
                                 Lol_Last_Warping = 0,
                                 ParriedLastBall = false,
@@ -7036,18 +7025,21 @@ do
                 end
 
                 local lock = Functions.Get_Ball_Lock(f)
-                local angleRad = math.acos(math.clamp(dot, -1, 1))
 
-                lock.Lerp_Radians = Functions.Lerp(lock.Lerp_Radians, angleRad, 0.62)
+                lock.Lerp_Radians = Functions.Lerp(lock.Lerp_Radians, math.rad(math.asin(math.clamp(dot, -1, 1))), 0.8)
 
-                if lock.Lerp_Radians < 0.033 then
+                if lock.Lerp_Radians < 0.018 then
                         lock.Last_Warping = tick()
                 end
 
                 local now2 = tick()
-                local tiWindow = math.min(timeToImpact, 0.7)
+                local tiWindow = math.max(math.min(timeToImpact, 0.7), 0.05)
 
-                if (now2 - lock.Last_Warping) < tiWindow and (now2 - lock.Curving) < tiWindow then
+                if now2 - lock.Last_Warping < tiWindow then
+                        return true
+                end
+
+                if now2 - lock.Curving < tiWindow then
                         return true
                 end
 
@@ -7273,26 +7265,16 @@ do
                         end
                 end
 
-                local radians = math.deg(math.asin(math.clamp(dot, -1, 1)))
+                local radians = math.rad(math.asin(math.clamp(dot, -1, 1)))
 
                 lock.Lol_Lerp_Radians = Functions.Lerp(lock.Lol_Lerp_Radians or 0, radians, 0.8)
 
-                if speed < 300 then
-                        if lock.Lol_Lerp_Radians < 0.02 then
-                                lock.Lol_Last_Warping = now2
-                        end
+                if lock.Lol_Lerp_Radians < 0.018 then
+                        lock.Lol_Last_Warping = now2
+                end
 
-                        if now2 - (lock.Lol_Last_Warping or 0) < adjustedReachTime / 1.19 then
-                                return true
-                        end
-                else
-                        if lock.Lol_Lerp_Radians < 0.018 then
-                                lock.Lol_Last_Warping = now2
-                        end
-
-                        if now2 - (lock.Lol_Last_Warping or 0) < adjustedReachTime / 1.5 then
-                                return true
-                        end
+                if now2 - (lock.Lol_Last_Warping or 0) < adjustedReachTime / 1.5 then
+                        return true
                 end
 
                 if #previousVelocity == 4 then
@@ -7667,7 +7649,8 @@ do
         end)
 
         do
-                local parryFireCount = 0
+                parryFireCount = 0
+                lastParryFireTick = 0
                 local parryRemoteWarned = false
 
                 local ParryRemote = nil
@@ -7954,13 +7937,21 @@ do
                         end
 
                         if ParryRemote and Hash2 and Hash3 and KazeNet.original then
-                                parryFireCount = parryFireCount + 1
+                                local spamBlatant = System.__properties and System.__properties.__spam_style == "Blatant"
+                                local nowFire = tick()
 
-                                if parryFireCount > 10000 then
+                                if nowFire - lastParryFireTick < (spamBlatant and 0.015 or 0.03) then
                                         return false
                                 end
 
-                                task.delay(0.5, function()
+                                if parryFireCount > (spamBlatant and 12 or 7) then
+                                        return false
+                                end
+
+                                lastParryFireTick = nowFire
+                                parryFireCount = parryFireCount + 1
+
+                                task.delay(spamBlatant and 0.25 or 0.5, function()
                                         if parryFireCount > 0 then
                                                 parryFireCount = parryFireCount - 1
                                         end
@@ -8612,7 +8603,7 @@ do
                                                                         ballLock.lastFireTick = now2
                                                                         ballLock.LolParried = true
                                                                         autoparry_debounce = true
-                                                                        autoparry_until = now2 + 0.4
+                                                                        autoparry_until = now2 + 0.6
                                                                         break
                                                                 end
                                                         end)
@@ -8855,7 +8846,7 @@ do
                                                         end
                                                 end
 
-                                                System.auto_spam = {}
+                                                System.auto_spam = { last_fire = 0, last_range = 0 }
 
                                                 System.auto_spam.get_entity_properties = function()
                                                         Functions.Closest_Player()
@@ -8922,66 +8913,38 @@ do
                                                                 return 5
                                                         end
 
-                                                        local targetHumanoid = closestPlayer:FindFirstChildOfClass("Humanoid")
                                                         local vectorVelocity = zoomies.VectorVelocity
                                                         local magnitude = vectorVelocity.Magnitude
                                                         local position = Functions.Ball_Position(ball)
 
                                                         if not position then
-                                                                return 5
+                                                                return System.auto_spam.last_range
                                                         end
 
-                                                        local direction = (rootPart.Position - position).Unit
-                                                        local dot = direction:Dot(vectorVelocity.Unit)
+                                                        if magnitude < 1 then
+                                                                return System.auto_spam.last_range
+                                                        end
+
+                                                        local dot = (rootPart.Position - position).Unit:Dot(vectorVelocity.Unit)
                                                         local targetPosition = closestPlayer.PrimaryPart.Position
                                                         local targetDistance = localPlayer:DistanceFromCharacter(targetPosition)
-                                                        local movementFactor = 1
-                                                        local moveDirection = humanoid.MoveDirection
-                                                        local targetDir = (targetPosition - rootPart.Position).Unit
-                                                        local targetMoveDirection = targetHumanoid and targetHumanoid.MoveDirection or Vector3.zero
+                                                        local spamRange = value.Ping + math.min(magnitude / 6, 95)
 
-                                                        _G.Last_Close_Contact = _G.Last_Close_Contact or 0
-                                                        _G.In_Close_Contact = _G.In_Close_Contact or false
-
-                                                        local now = tick()
-
-                                                        if targetDistance <= 3 then
-                                                                _G.In_Close_Contact = true
+                                                        if value.Entity_Properties.Distance > spamRange then
+                                                                return System.auto_spam.last_range
                                                         end
 
-                                                        if _G.In_Close_Contact and targetDistance > 3.3 then
-                                                                _G.In_Close_Contact = false
-                                                                _G.Last_Close_Contact = now
+                                                        if value.Ball_Properties.Distance > spamRange then
+                                                                return System.auto_spam.last_range
                                                         end
 
-                                                        local canUseDiv10 = (not _G.In_Close_Contact) and (now - _G.Last_Close_Contact >= 1.5)
-
-                                                        if canUseDiv10 and moveDirection.Magnitude > 0.2 and moveDirection:Dot(targetDir) < -0.4 then
-                                                                movementFactor = 10
+                                                        if targetDistance > spamRange then
+                                                                return System.auto_spam.last_range
                                                         end
 
-                                                        if canUseDiv10 and targetMoveDirection.Magnitude > 0.2 and targetMoveDirection:Dot(-targetDir) < -0.4 then
-                                                                movementFactor = 10
-                                                        end
+                                                        System.auto_spam.last_range = spamRange - math.clamp(dot, -1, 0) * (5 - math.min(magnitude / 5, 5))
 
-                                                        local maximumSpamDistance = value.Ping * 0.7 + math.min(magnitude / (movementFactor * 1.2), 80)
-
-                                                        if value.Entity_Properties.Distance > maximumSpamDistance then
-                                                                return 5
-                                                        end
-
-                                                        if value.Ball_Properties.Distance > maximumSpamDistance then
-                                                                return 5
-                                                        end
-
-                                                        if targetDistance > maximumSpamDistance then
-                                                                return 5
-                                                        end
-
-                                                        local dotReduction = math.clamp(-dot, 0, 1)
-                                                        local dotImpact = math.clamp(dotReduction * (magnitude / 40), 0, 4)
-
-                                                        return maximumSpamDistance - dotImpact
+                                                        return System.auto_spam.last_range
                                                 end
 
                                                 System.auto_spam.start = function()
@@ -9063,23 +9026,19 @@ do
                                                                                 return
                                                                         end
 
+                                                                        local spamStyle = System.__properties.__spam_style
                                                                         local spamThreshold = System.__properties.__spam_threshold
 
-                                                                        if getgenv().AutoSpamStyle == "Dynamic" then
-                                                                                local pingMs = Functions.Get_Ping_MS()
-                                                                                local ballSpeed = zoomies.VectorVelocity.Magnitude
-                                                                                local baseWindow = math.clamp(10 + pingMs / 10, 10, 35)
-                                                                                local multiBallBonus = #Functions.Get_Balls() >= 2 and 3 or 0
-                                                                                local outerWindow = baseWindow + math.min(ballSpeed / 6, 95) + multiBallBonus
-                                                                                local innerWindow = baseWindow + math.min(ballSpeed / 6, 30) + multiBallBonus
-                                                                                local timeFactor = math.min(0.5 + pingMs / 1000, 0.75)
-                                                                                local ratioTerm = math.max(distance / innerWindow, distance2 / outerWindow)
-                                                                                local timeTerm = 2 * math.max(distance, distance2) / math.max(ballSpeed, 0.001) * timeFactor
+                                                                        if spamStyle == "Legit" then
+                                                                                local nowSpam = tick()
 
-                                                                                spamThreshold = math.clamp(math.ceil(math.min(ratioTerm, timeTerm) * 3), 1, 3)
+                                                                                if nowSpam - System.auto_spam.last_fire < 0.04 + math.random() * 0.05 then
+                                                                                        return
+                                                                                end
                                                                         end
 
-                                                                        if distance2 <= value and spamCount > spamThreshold then
+                                                                        if distance2 <= value and parryFireCount > (spamStyle == "Blatant" and 0 or spamThreshold) then
+                                                                                System.auto_spam.last_fire = tick()
                                                                                 ExecuteParry(SelectedParryType)
                                                                                 Library.bump_score("Auto Spam")
 
@@ -9106,7 +9065,12 @@ do
                                                 end
 
                                                 ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(value, value2)
-                                                        local primaryPart = localPlayer2.Character.PrimaryPart
+                                                        local myCharacter = localPlayer2.Character
+                                                        local primaryPart = myCharacter and myCharacter.PrimaryPart
+
+                                                        if not primaryPart then
+                                                                return
+                                                        end
                                                         local ball = Functions.Get_Ball()
                                                         if not ball then
                                                                 return
@@ -9123,8 +9087,8 @@ do
                                                                 return
                                                         end
 
-                                                        local magnitude2 = (localPlayer2.Character.PrimaryPart.Position - position).Magnitude
-                                                        local value3 = (localPlayer2.Character.PrimaryPart.Position - position).Unit:Dot(zoomies.VectorVelocity.Unit)
+                                                        local magnitude2 = (primaryPart.Position - position).Magnitude
+                                                        local value3 = (primaryPart.Position - position).Unit:Dot(zoomies.VectorVelocity.Unit)
                                                         local value6 = Functions.Get_Ping_MS()
                                                         local n = math.min(magnitude / 100, 40)
                                                         local value4 = magnitude2 / magnitude - value6 / 1000
@@ -11780,6 +11744,7 @@ local UserInputService = game:GetService("UserInputService")
                         do
                                 local value = false
                                 getgenv().AutoSpamNotify = value
+                                getgenv().AutoSpamStyle = "Legit"
                         end
                 end
 
@@ -11891,52 +11856,31 @@ local UserInputService = game:GetService("UserInputService")
                         })
 
 
-                        local thresholdSlider = nil
-                        local spamStyleApplied = false
-
-                        local applySpamStyle = function()
-                                if not (thresholdSlider and thresholdSlider._holder) then
-                                        return
-                                end
-
-                                local isDynamic = getgenv().AutoSpamStyle == "Dynamic"
-
-                                if spamStyleApplied == isDynamic then
-                                        return
-                                end
-
-                                spamStyleApplied = isDynamic
-                                thresholdSlider._holder.Visible = not isDynamic
-                                module._size = module._size + (isDynamic and -28 or 28)
-                                module:resize()
-                        end
-
                         module:create_dropdown({
                                 title = "Style",
                                 flag = "Auto_Spam_Style",
-                                options = { "Normal", "Dynamic" },
+                                options = { "Legit", "Blatant" },
+                                default = "Legit",
                                 multi_dropdown = false,
                                 maximum_options = 2,
-                                callback = function(style)
-                                        getgenv().AutoSpamStyle = style == "Dynamic" and "Dynamic" or "Normal"
-                                        applySpamStyle()
+                                callback = function(spamStyle)
+                                        getgenv().AutoSpamStyle = spamStyle
+                                        System.__properties.__spam_style = spamStyle
                                 end,
                         })
 
-                        thresholdSlider = module:create_slider({
+                        module:create_slider({
                                 title = "Parry Threshold",
                                 flag = "Parry_Threshold",
                                 maximum_value = 3,
                                 minimum_value = 1,
-                                value = 2,
+                                value = 3,
                                 round_number = false,
                                 callback = function(spamThreshold)
                                         ParryThreshold = spamThreshold
                                         System.__properties.__spam_threshold = spamThreshold
                                 end,
                         })
-
-                        applySpamStyle()
 
                         module:create_checkbox({
                                 title = "Animation Fix",
@@ -13897,7 +13841,6 @@ local UserInputService = game:GetService("UserInputService")
                 })
 
                 moduleConnections ["Balls Reset"] = workspace:WaitForChild("Balls").ChildRemoved:Connect(function()
-                        spamCount = 0
                         parried = false
 
                         if moduleConnections ["Target Change"] then
