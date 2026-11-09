@@ -10947,33 +10947,45 @@ do
                                 do
                                         local parryTypeMap = {
                                                 ["Camera"] = "Camera",
-                                                ["Slowball"] = "Slowball",
-                                                ["Fastball"] = "Fastball",
-                                                ["Dot"] = "Fastball",
-                                                ["Random"] = "Random",
                                                 ["Backwards"] = "Backwards",
-                                                ["Straight"] = "Straight",
+                                                ["Dot"] = "Fastball",
+                                                ["Slow"] = "Slowball",
                                                 ["High"] = "High",
                                                 ["Left"] = "Left",
                                                 ["Right"] = "Right",
-                                                ["Random Target"] = "RandomTarget",
                                         }
 
-                                        local curveOrder = { "Camera", "Backwards", "Dot", "Slowball", "High", "Left", "Right" }
+                                        local reverseCurveName = {
+                                                Camera = "Camera",
+                                                Backwards = "Backwards",
+                                                Fastball = "Dot",
+                                                Slowball = "Slow",
+                                                High = "High",
+                                                Left = "Left",
+                                                Right = "Right",
+                                        }
+
+                                        local curveOrder = { "Camera", "Backwards", "Dot", "Slow", "High", "Left", "Right" }
                                         local curveHotkeys = {
                                                 [Enum.KeyCode.One] = "Camera",
                                                 [Enum.KeyCode.Two] = "Backwards",
                                                 [Enum.KeyCode.Three] = "Dot",
-                                                [Enum.KeyCode.Four] = "Slowball",
+                                                [Enum.KeyCode.Four] = "Slow",
                                                 [Enum.KeyCode.Five] = "High",
                                                 [Enum.KeyCode.Six] = "Left",
                                                 [Enum.KeyCode.Seven] = "Right",
                                         }
+
+                                        local randomCurvePool = { "Backwards", "High", "Dot", "Slow", "Left", "Right" }
                                         local currentCurveName = "Camera"
-                                        local curveShortcutEnabled = false
-                                        local curvePillOn = false
-                                        local curveShortcutConn = nil
-                                        local curvePill = { gui = nil, frame = nil, label = nil, buttons = {}, drag = nil, release = nil }
+                                        local hotkeysOn = false
+                                        local randomCurveOn = false
+                                        local hotkeyConn = nil
+                                        local randomConn = nil
+                                        local curveModeDropdown = nil
+                                        local curveTypeDropdown = nil
+                                        local curveSyncLock = false
+                                        local curvePill = { gui = nil, root = nil, header = nil, eyebrow = nil, cells = {}, cellOrder = {}, conns = {}, drag = nil, release = nil }
 
                                         local function curve_pill_destroy()
                                                 if curvePill.drag then
@@ -10986,6 +10998,14 @@ do
                                                         curvePill.release = nil
                                                 end
 
+                                                for _, conn in ipairs(curvePill.conns) do
+                                                        pcall(function()
+                                                                conn:Disconnect()
+                                                        end)
+                                                end
+
+                                                table.clear(curvePill.conns)
+
                                                 if curvePill.gui then
                                                         pcall(function()
                                                                 curvePill.gui:Destroy()
@@ -10993,39 +11013,72 @@ do
                                                 end
 
                                                 curvePill.gui = nil
-                                                curvePill.frame = nil
-                                                curvePill.label = nil
-                                                curvePill.buttons = {}
+                                                curvePill.root = nil
+                                                curvePill.header = nil
+                                                curvePill.eyebrow = nil
+                                                curvePill.cells = {}
+                                                curvePill.cellOrder = {}
                                         end
 
-                                        local curveTypeDropdown = ball:create_dropdown({
-                                                title = "Curve Type",
-                                                flag = "ParryDirection",
-                                                options = { "Camera", "Slowball", "Fastball", "Dot", "Random", "Backwards", "Straight", "High", "Left", "Right", "Random Target" },
-                                                multi_dropdown = false,
-                                                maximum_options = 11,
-                                                callback = function(value)
-                                                        SelectedParryType = parryTypeMap [value] or value
-                                                        currentCurveName = value
+                                        local function curve_pill_refresh(fullRefresh)
+                                                if curvePill.header then
+                                                        curvePill.header.Text = currentCurveName
+                                                end
 
-                                                        if curvePill.label then
-                                                                curvePill.label.Text = value
+                                                if curvePill.eyebrow then
+                                                        if randomCurveOn then
+                                                                curvePill.eyebrow.Text = "AUTO ROLL"
+                                                                curvePill.eyebrow.TextColor3 = accent()
+                                                        else
+                                                                curvePill.eyebrow.Text = "CURVE"
+                                                                curvePill.eyebrow.TextColor3 = Color3.fromRGB(150, 150, 158)
+                                                        end
+                                                end
+
+                                                if not fullRefresh then
+                                                        return
+                                                end
+
+                                                for name, cell in pairs(curvePill.cells) do
+                                                        local selected = name == currentCurveName
+
+                                                        cell.bg.BackgroundColor3 = selected and accent() or Color3.fromRGB(30, 30, 36)
+                                                        cell.bg.BackgroundTransparency = selected and 0 or 0.2
+                                                        cell.label.TextColor3 = selected and Color3.fromRGB(13, 13, 15) or Color3.fromRGB(205, 205, 212)
+                                                        cell.dot.BackgroundColor3 = accent()
+                                                        cell.dot.BackgroundTransparency = selected and 0 or 1
+                                                        cell.stroke.Color = selected and accent() or Color3.fromRGB(56, 56, 64)
+                                                        cell.stroke.Transparency = selected and 0.15 or 0.4
+                                                        cell.keyLabel.TextColor3 = selected and Color3.fromRGB(13, 13, 15) or Color3.fromRGB(140, 140, 150)
+                                                        cell.keyChip.BackgroundTransparency = selected and 0.75 or 0.94
+                                                end
+                                        end
+
+                                        local function apply_curve_mode(name, source)
+                                                local mapped = parryTypeMap [name]
+
+                                                if not mapped then
+                                                        mapped = "Camera"
+                                                end
+
+                                                SelectedParryType = mapped
+                                                currentCurveName = reverseCurveName [mapped] or mapped
+
+                                                if not curveSyncLock then
+                                                        curveSyncLock = true
+
+                                                        if curveModeDropdown and curveModeDropdown ~= source then
+                                                                curveModeDropdown:update(currentCurveName)
                                                         end
 
-                                                        for _, lbl in ipairs(curvePill.buttons) do
-                                                                if lbl.Text == value then
-                                                                        lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                                                        lbl.TextTransparency = 0
-                                                                else
-                                                                        lbl.TextColor3 = Color3.fromRGB(150, 150, 158)
-                                                                        lbl.TextTransparency = 0.1
-                                                                end
+                                                        if curveTypeDropdown and curveTypeDropdown ~= source then
+                                                                curveTypeDropdown:update(currentCurveName)
                                                         end
-                                                end,
-                                        })
 
-                                        local function apply_curve_mode(name)
-                                                curveTypeDropdown:update(name)
+                                                        curveSyncLock = false
+                                                end
+
+                                                curve_pill_refresh(true)
                                         end
 
                                         local function curve_pill_create()
@@ -11034,307 +11087,605 @@ do
                                                 end
 
                                                 local playerGui = localPlayer:WaitForChild("PlayerGui")
-                                                local oldOverlay = playerGui:FindFirstChild("KazeCurveOverlay")
+                                                local oldOverlay = playerGui:FindFirstChild("KazeCurveUI")
 
                                                 if oldOverlay then
                                                         oldOverlay:Destroy()
                                                 end
 
                                                 local overlay = Instance.new("ScreenGui")
-                                                overlay.Name = "KazeCurveOverlay"
+                                                overlay.Name = "KazeCurveUI"
                                                 overlay.ResetOnSpawn = false
                                                 overlay.IgnoreGuiInset = true
                                                 overlay.DisplayOrder = 50
                                                 overlay.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
                                                 overlay.Parent = playerGui
 
-                                                local pill = Instance.new("Frame")
-                                                pill.Name = "CurvePill"
-                                                pill.Size = UDim2.new(0, 116, 0, 34)
-                                                pill.AnchorPoint = Vector2.new(0.5, 1)
-                                                pill.Position = UDim2.new(0.5, 0, 1, -26)
-                                                pill.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
-                                                pill.BackgroundTransparency = 0.05
-                                                pill.BorderSizePixel = 0
-                                                pill.ClipsDescendants = false
-                                                pill.Active = true
-                                                pill.Parent = overlay
+                                                local root = Instance.new("Frame")
+                                                root.Name = "CurvePicker"
+                                                root.AnchorPoint = Vector2.new(0.5, 0)
+                                                root.Position = UDim2.new(0.5, 0, 0, 16)
+                                                root.Size = UDim2.fromOffset(182, 46)
+                                                root.BackgroundTransparency = 1
+                                                root.BorderSizePixel = 0
+                                                root.Active = true
+                                                root.Parent = overlay
 
-                                                local pillCorner = Instance.new("UICorner")
-                                                pillCorner.CornerRadius = UDim.new(0, 9)
-                                                pillCorner.Parent = pill
+                                                local shadowFar = Instance.new("Frame")
+                                                shadowFar.Name = "ShadowFar"
+                                                shadowFar.AnchorPoint = Vector2.new(0.5, 0.5)
+                                                shadowFar.Position = UDim2.new(0.5, 0, 0.5, 10)
+                                                shadowFar.Size = UDim2.new(1, 28, 1, 30)
+                                                shadowFar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                                shadowFar.BackgroundTransparency = 0.93
+                                                shadowFar.BorderSizePixel = 0
+                                                shadowFar.ZIndex = 1
+                                                shadowFar.Parent = root
+                                                add_corner(shadowFar, 20)
 
-                                                local pillStroke = Instance.new("UIStroke")
-                                                pillStroke.Color = Color3.fromRGB(255, 255, 255)
-                                                pillStroke.Transparency = 0.86
-                                                pillStroke.Thickness = 1
-                                                pillStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                                                pillStroke.Parent = pill
+                                                local shadowMid = Instance.new("Frame")
+                                                shadowMid.Name = "ShadowMid"
+                                                shadowMid.AnchorPoint = Vector2.new(0.5, 0.5)
+                                                shadowMid.Position = UDim2.new(0.5, 0, 0.5, 6)
+                                                shadowMid.Size = UDim2.new(1, 14, 1, 16)
+                                                shadowMid.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                                shadowMid.BackgroundTransparency = 0.9
+                                                shadowMid.BorderSizePixel = 0
+                                                shadowMid.ZIndex = 2
+                                                shadowMid.Parent = root
+                                                add_corner(shadowMid, 18)
 
-                                                local pillLabel = Instance.new("TextLabel")
-                                                pillLabel.Name = "PillLabel"
-                                                pillLabel.Size = UDim2.new(1, -10, 1, 0)
-                                                pillLabel.Position = UDim2.new(0, 5, 0, 0)
-                                                pillLabel.BackgroundTransparency = 1
-                                                pillLabel.FontFace = Font.new(FONT, Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-                                                pillLabel.Text = currentCurveName or "Curve"
-                                                pillLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
-                                                pillLabel.TextSize = 12
-                                                pillLabel.TextXAlignment = Enum.TextXAlignment.Center
-                                                pillLabel.TextYAlignment = Enum.TextYAlignment.Center
-                                                pillLabel.Parent = pill
+                                                local shadowNear = Instance.new("Frame")
+                                                shadowNear.Name = "ShadowNear"
+                                                shadowNear.AnchorPoint = Vector2.new(0.5, 0.5)
+                                                shadowNear.Position = UDim2.new(0.5, 0, 0.5, 2)
+                                                shadowNear.Size = UDim2.new(1, 6, 1, 8)
+                                                shadowNear.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                                                shadowNear.BackgroundTransparency = 0.84
+                                                shadowNear.BorderSizePixel = 0
+                                                shadowNear.ZIndex = 3
+                                                shadowNear.Parent = root
+                                                add_corner(shadowNear, 16)
 
-                                                local optionH = 30
-                                                local popup = Instance.new("Frame")
-                                                popup.Name = "CurvePopup"
-                                                popup.Size = UDim2.new(0, 116, 0, #curveOrder * optionH + 8)
-                                                popup.AnchorPoint = Vector2.new(0.5, 1)
-                                                popup.Position = UDim2.new(0.5, 0, 0, -6)
-                                                popup.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
-                                                popup.BackgroundTransparency = 0.05
-                                                popup.BorderSizePixel = 0
-                                                popup.Visible = false
-                                                popup.Parent = pill
+                                                local main = Instance.new("Frame")
+                                                main.Name = "Body"
+                                                main.Size = UDim2.new(1, 0, 1, 0)
+                                                main.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+                                                main.BackgroundTransparency = 0.02
+                                                main.BorderSizePixel = 0
+                                                main.ClipsDescendants = true
+                                                main.ZIndex = 4
+                                                main.Parent = root
+                                                add_corner(main, 14)
 
-                                                local popupCorner = Instance.new("UICorner")
-                                                popupCorner.CornerRadius = UDim.new(0, 9)
-                                                popupCorner.Parent = popup
+                                                local bodyGradient = Instance.new("UIGradient")
+                                                bodyGradient.Rotation = 90
+                                                bodyGradient.Color = ColorSequence.new(Color3.fromRGB(32, 32, 38), Color3.fromRGB(17, 17, 21))
+                                                bodyGradient.Parent = main
 
-                                                local popupStroke = Instance.new("UIStroke")
-                                                popupStroke.Color = Color3.fromRGB(255, 255, 255)
-                                                popupStroke.Transparency = 0.86
-                                                popupStroke.Thickness = 1
-                                                popupStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-                                                popupStroke.Parent = popup
+                                                local mainStroke = Instance.new("UIStroke")
+                                                mainStroke.Color = accent()
+                                                mainStroke.Transparency = 0.55
+                                                mainStroke.Thickness = 1
+                                                mainStroke.Parent = main
 
-                                                local popupPad = Instance.new("UIPadding")
-                                                popupPad.PaddingTop = UDim.new(0, 4)
-                                                popupPad.PaddingBottom = UDim.new(0, 4)
-                                                popupPad.Parent = popup
+                                                TweenService:Create(mainStroke,
+                                                TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, 0.25),
+                                                { Transparency = 0.78 }):Play()
 
-                                                local popupList = Instance.new("UIListLayout")
-                                                popupList.SortOrder = Enum.SortOrder.LayoutOrder
-                                                popupList.HorizontalAlignment = Enum.HorizontalAlignment.Center
-                                                popupList.Padding = UDim.new(0, 0)
-                                                popupList.Parent = popup
+                                                local topGlint = Instance.new("Frame")
+                                                topGlint.Name = "Glint"
+                                                topGlint.Position = UDim2.new(0, 12, 0, 1)
+                                                topGlint.Size = UDim2.new(1, -24, 0, 1)
+                                                topGlint.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                                topGlint.BackgroundTransparency = 0.75
+                                                topGlint.BorderSizePixel = 0
+                                                topGlint.ZIndex = 6
+                                                topGlint.Parent = main
 
-                                                local popupOpen = false
-                                                local popupTweening = false
+                                                local glintGradient = Instance.new("UIGradient")
+                                                glintGradient.Transparency = NumberSequence.new({
+                                                        NumberSequenceKeypoint.new(0, 1),
+                                                        NumberSequenceKeypoint.new(0.5, 0.1),
+                                                        NumberSequenceKeypoint.new(1, 1),
+                                                })
+                                                glintGradient.Parent = topGlint
 
-                                                local function open_popup()
-                                                        if popupTweening then
+                                                local badge = Instance.new("Frame")
+                                                badge.Name = "Badge"
+                                                badge.Position = UDim2.new(0, 9, 0, 9)
+                                                badge.Size = UDim2.fromOffset(28, 28)
+                                                badge.BackgroundColor3 = accent()
+                                                badge.BackgroundTransparency = 0.82
+                                                badge.BorderSizePixel = 0
+                                                badge.ZIndex = 6
+                                                badge.Parent = main
+                                                add_corner(badge, 9)
+
+                                                local badgeStroke = Instance.new("UIStroke")
+                                                badgeStroke.Color = accent()
+                                                badgeStroke.Transparency = 0.3
+                                                badgeStroke.Thickness = 1
+                                                badgeStroke.Parent = badge
+
+                                                local badgeFallback = Instance.new("TextLabel")
+                                                badgeFallback.BackgroundTransparency = 1
+                                                badgeFallback.Size = UDim2.new(1, 0, 1, 0)
+                                                badgeFallback.FontFace = Font.new(FONT, Enum.FontWeight.Bold)
+                                                badgeFallback.TextSize = 13
+                                                badgeFallback.Text = "C"
+                                                badgeFallback.TextColor3 = accent()
+                                                badgeFallback.TextXAlignment = Enum.TextXAlignment.Center
+                                                badgeFallback.TextYAlignment = Enum.TextYAlignment.Center
+                                                badgeFallback.ZIndex = 7
+                                                badgeFallback.Parent = badge
+
+                                                local badgeIcon = Instance.new("ImageLabel")
+                                                badgeIcon.BackgroundTransparency = 1
+                                                badgeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+                                                badgeIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+                                                badgeIcon.Size = UDim2.fromOffset(15, 15)
+                                                badgeIcon.Visible = false
+                                                badgeIcon.ZIndex = 8
+                                                badgeIcon.Parent = badge
+
+                                                local splineAsset = KazeIcons.get("spline") or KazeIcons.get("orbit") or KazeIcons.get("trending-up")
+
+                                                if splineAsset then
+                                                        badgeIcon.Image = splineAsset.Url
+                                                        badgeIcon.ImageRectOffset = splineAsset.ImageRectOffset or Vector2.zero
+                                                        badgeIcon.ImageRectSize = splineAsset.ImageRectSize or Vector2.zero
+                                                        badgeIcon.Visible = true
+                                                        badgeFallback.Visible = false
+                                                end
+
+                                                local eyebrow = Instance.new("TextLabel")
+                                                eyebrow.Name = "Eyebrow"
+                                                eyebrow.BackgroundTransparency = 1
+                                                eyebrow.Position = UDim2.new(0, 46, 0, 8)
+                                                eyebrow.Size = UDim2.new(1, -84, 0, 10)
+                                                eyebrow.FontFace = Font.new(FONT, Enum.FontWeight.Bold)
+                                                eyebrow.TextSize = 9
+                                                eyebrow.TextColor3 = Color3.fromRGB(150, 150, 158)
+                                                eyebrow.TextXAlignment = Enum.TextXAlignment.Left
+                                                eyebrow.TextYAlignment = Enum.TextYAlignment.Center
+                                                eyebrow.Text = "CURVE"
+                                                eyebrow.ZIndex = 6
+                                                eyebrow.Parent = main
+
+                                                local header = Instance.new("TextLabel")
+                                                header.Name = "Header"
+                                                header.BackgroundTransparency = 1
+                                                header.Position = UDim2.new(0, 46, 0, 18)
+                                                header.Size = UDim2.new(1, -84, 0, 18)
+                                                header.FontFace = Font.new(FONT, Enum.FontWeight.SemiBold)
+                                                header.TextSize = 14
+                                                header.TextColor3 = Theme.text
+                                                header.TextXAlignment = Enum.TextXAlignment.Left
+                                                header.TextYAlignment = Enum.TextYAlignment.Center
+                                                header.Text = currentCurveName
+                                                header.TextTruncate = Enum.TextTruncate.AtEnd
+                                                header.ZIndex = 6
+                                                header.Parent = main
+
+                                                local chevron = Instance.new("TextLabel")
+                                                chevron.Name = "Chevron"
+                                                chevron.AnchorPoint = Vector2.new(1, 0.5)
+                                                chevron.Position = UDim2.new(1, -14, 0, 23)
+                                                chevron.Size = UDim2.fromOffset(14, 14)
+                                                chevron.BackgroundTransparency = 1
+                                                chevron.FontFace = Font.new(FONT, Enum.FontWeight.SemiBold)
+                                                chevron.TextSize = 12
+                                                chevron.TextColor3 = accent()
+                                                chevron.Text = "v"
+                                                chevron.TextXAlignment = Enum.TextXAlignment.Center
+                                                chevron.TextYAlignment = Enum.TextYAlignment.Center
+                                                chevron.ZIndex = 6
+                                                chevron.Parent = main
+
+                                                local divider = Instance.new("Frame")
+                                                divider.Name = "Divider"
+                                                divider.Position = UDim2.new(0, 12, 0, 46)
+                                                divider.Size = UDim2.new(1, -24, 0, 1)
+                                                divider.BackgroundColor3 = accent()
+                                                divider.BackgroundTransparency = 1
+                                                divider.BorderSizePixel = 0
+                                                divider.ZIndex = 5
+                                                divider.Parent = main
+
+                                                local dividerGradient = Instance.new("UIGradient")
+                                                dividerGradient.Transparency = NumberSequence.new({
+                                                        NumberSequenceKeypoint.new(0, 1),
+                                                        NumberSequenceKeypoint.new(0.5, 0.4),
+                                                        NumberSequenceKeypoint.new(1, 1),
+                                                })
+                                                dividerGradient.Parent = divider
+
+                                                local gridHolder = Instance.new("Frame")
+                                                gridHolder.Name = "Options"
+                                                gridHolder.Position = UDim2.fromOffset(10, 54)
+                                                gridHolder.Size = UDim2.new(1, -20, 1, -54)
+                                                gridHolder.BackgroundTransparency = 1
+                                                gridHolder.Visible = false
+                                                gridHolder.ZIndex = 5
+                                                gridHolder.Parent = main
+
+                                                local grid = Instance.new("UIGridLayout")
+                                                grid.CellSize = UDim2.fromOffset(132, 28)
+                                                grid.CellPadding = UDim2.fromOffset(6, 4)
+                                                grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                                                grid.VerticalAlignment = Enum.VerticalAlignment.Top
+                                                grid.Parent = gridHolder
+
+                                                local footer = Instance.new("Frame")
+                                                footer.Name = "Footer"
+                                                footer.AnchorPoint = Vector2.new(0, 1)
+                                                footer.Position = UDim2.new(0, 10, 1, -8)
+                                                footer.Size = UDim2.new(1, -20, 0, 18)
+                                                footer.BackgroundTransparency = 1
+                                                footer.BorderSizePixel = 0
+                                                footer.ZIndex = 5
+                                                footer.Visible = false
+                                                footer.Parent = main
+
+                                                local footerLine = Instance.new("Frame")
+                                                footerLine.Position = UDim2.new(0, 0, 0, 0)
+                                                footerLine.Size = UDim2.new(1, 0, 0, 1)
+                                                footerLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                                footerLine.BackgroundTransparency = 0.9
+                                                footerLine.BorderSizePixel = 0
+                                                footerLine.Parent = footer
+
+                                                local footerLineGradient = Instance.new("UIGradient")
+                                                footerLineGradient.Transparency = NumberSequence.new({
+                                                        NumberSequenceKeypoint.new(0, 1),
+                                                        NumberSequenceKeypoint.new(0.5, 0.2),
+                                                        NumberSequenceKeypoint.new(1, 1),
+                                                })
+                                                footerLineGradient.Parent = footerLine
+
+                                                local footerLabel = Instance.new("TextLabel")
+                                                footerLabel.BackgroundTransparency = 1
+                                                footerLabel.Position = UDim2.new(0, 0, 0, 4)
+                                                footerLabel.Size = UDim2.new(1, 0, 0, 12)
+                                                footerLabel.FontFace = Font.new(FONT, Enum.FontWeight.Medium)
+                                                footerLabel.TextSize = 9
+                                                footerLabel.TextColor3 = Theme.faint
+                                                footerLabel.TextXAlignment = Enum.TextXAlignment.Center
+                                                footerLabel.TextYAlignment = Enum.TextYAlignment.Center
+                                                footerLabel.Text = "Drag to move  |  Keys 1-7"
+                                                footerLabel.Parent = footer
+
+                                                local expanded = false
+                                                local pillTweening = false
+                                                local hoverPill = TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+                                                local CLOSED_SIZE = UDim2.fromOffset(182, 46)
+                                                local OPEN_SIZE = UDim2.fromOffset(296, 204)
+
+                                                local function curve_collapse()
+                                                        if pillTweening then
                                                                 return
                                                         end
 
-                                                        popupOpen = true
-                                                        popupTweening = true
-                                                        popup.BackgroundTransparency = 1
-                                                        popupStroke.Transparency = 1
-                                                        popup.Position = UDim2.new(0.5, 0, 0, 6)
-                                                        popup.Visible = true
+                                                        expanded = false
+                                                        pillTweening = true
 
-                                                        for _, item in ipairs(popup:GetDescendants()) do
-                                                                if item:IsA("TextLabel") or item:IsA("TextButton") then
-                                                                        item.TextTransparency = 1
-                                                                elseif item:IsA("Frame") then
-                                                                        item.BackgroundTransparency = 1
-                                                                end
-                                                        end
+                                                        local info = TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+                                                        TweenService:Create(chevron, info, { Rotation = 0 }):Play()
+                                                        TweenService:Create(divider, TweenInfo.new(0.15, Enum.EasingStyle.Quint, Enum.EasingDirection.In), { BackgroundTransparency = 1 }):Play()
 
-                                                        local info = TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+                                                        local heightTween = TweenService:Create(root, info, { Size = UDim2.fromOffset(296, 46) })
+                                                        heightTween:Play()
+                                                        heightTween.Completed:Wait()
+                                                        gridHolder.Visible = false
+                                                        footer.Visible = false
+                                                        TweenService:Create(root, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = CLOSED_SIZE }):Play()
 
-                                                        for _, item in ipairs(popup:GetDescendants()) do
-                                                                if item:IsA("TextLabel") or item:IsA("TextButton") then
-                                                                        TweenService:Create(item, info, { TextTransparency = 0 }):Play()
-                                                                elseif item:IsA("Frame") then
-                                                                        TweenService:Create(item, info, { BackgroundTransparency = 0.92 }):Play()
-                                                                end
-                                                        end
-
-                                                        TweenService:Create(popup, info, { BackgroundTransparency = 0.05, Position = UDim2.new(0.5, 0, 0, -6) }):Play()
-                                                        TweenService:Create(popupStroke, info, { Transparency = 0.86 }):Play()
-                                                        task.delay(0.22, function()
-                                                                popupTweening = false
+                                                        task.delay(0.26, function()
+                                                                pillTweening = false
                                                         end)
                                                 end
 
-                                                local function close_popup()
-                                                        if popupTweening then
+                                                local function curve_expand()
+                                                        if pillTweening then
                                                                 return
                                                         end
 
-                                                        popupOpen = false
-                                                        popupTweening = true
-                                                        local info = TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+                                                        expanded = true
+                                                        pillTweening = true
 
-                                                        for _, item in ipairs(popup:GetDescendants()) do
-                                                                if item:IsA("TextLabel") or item:IsA("TextButton") then
-                                                                        TweenService:Create(item, info, { TextTransparency = 1 }):Play()
-                                                                elseif item:IsA("Frame") then
-                                                                        TweenService:Create(item, info, { BackgroundTransparency = 1 }):Play()
+                                                        divider.Visible = true
+                                                        TweenService:Create(divider, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { BackgroundTransparency = 0 }):Play()
+
+                                                        local widthTween = TweenService:Create(root, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Size = UDim2.fromOffset(296, 46) })
+                                                        widthTween:Play()
+                                                        widthTween.Completed:Wait()
+                                                        gridHolder.Visible = true
+                                                        footer.Visible = true
+                                                        TweenService:Create(chevron, TweenInfo.new(0.26, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Rotation = 180 }):Play()
+                                                        TweenService:Create(root, TweenInfo.new(0.32, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = OPEN_SIZE }):Play()
+
+                                                        for i, name in ipairs(curvePill.cellOrder) do
+                                                                local cell = curvePill.cells [name]
+
+                                                                if cell and cell.group then
+                                                                        cell.group.GroupTransparency = 1
+                                                                        task.delay(0.03 + i * 0.014, function()
+                                                                                if cell.group.Parent then
+                                                                                        TweenService:Create(cell.group, TweenInfo.new(0.18, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { GroupTransparency = 0 }):Play()
+                                                                                end
+                                                                        end)
                                                                 end
                                                         end
 
-                                                        TweenService:Create(popup, info, { BackgroundTransparency = 1, Position = UDim2.new(0.5, 0, 0, 6) }):Play()
-                                                        TweenService:Create(popupStroke, info, { Transparency = 1 }):Play()
-                                                        task.delay(0.18, function()
-                                                                popup.Visible = false
-                                                                popup.Position = UDim2.new(0.5, 0, 0, -6)
-                                                                popupTweening = false
+                                                        task.delay(0.36, function()
+                                                                pillTweening = false
                                                         end)
                                                 end
 
-                                                for index, name in ipairs(curveOrder) do
-                                                        local optionButton = Instance.new("TextButton")
-                                                        optionButton.Name = "CurveOpt"
-                                                        optionButton.Size = UDim2.new(1, 0, 0, optionH)
-                                                        optionButton.BackgroundTransparency = 1
-                                                        optionButton.BorderSizePixel = 0
-                                                        optionButton.AutoButtonColor = false
-                                                        optionButton.Text = ""
-                                                        optionButton.LayoutOrder = index
-                                                        optionButton.Parent = popup
+                                                curvePill.cellOrder = {}
+                                                local keyDisplay = { One = "1", Two = "2", Three = "3", Four = "4", Five = "5", Six = "6", Seven = "7", Eight = "8", Nine = "9", Zero = "0" }
 
-                                                        local optionLabel = Instance.new("TextLabel")
-                                                        optionLabel.Size = UDim2.new(1, 0, 1, 0)
-                                                        optionLabel.BackgroundTransparency = 1
-                                                        optionLabel.FontFace = Font.new(FONT, Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-                                                        optionLabel.Text = name
-                                                        optionLabel.TextColor3 = Color3.fromRGB(150, 150, 158)
-                                                        optionLabel.TextSize = 12
-                                                        optionLabel.TextXAlignment = Enum.TextXAlignment.Center
-                                                        optionLabel.TextYAlignment = Enum.TextYAlignment.Center
-                                                        optionLabel.Parent = optionButton
+                                                for _, name in ipairs(curveOrder) do
+                                                        local cell = Instance.new("CanvasGroup")
+                                                        cell.Name = "CurveOpt"
+                                                        cell.Size = UDim2.fromOffset(132, 28)
+                                                        cell.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+                                                        cell.BackgroundTransparency = 0.2
+                                                        cell.BorderSizePixel = 0
+                                                        cell.GroupTransparency = 1
+                                                        cell.ZIndex = 5
+                                                        cell.Parent = gridHolder
+                                                        add_corner(cell, 8)
 
-                                                        if index < #curveOrder then
-                                                                local separator = Instance.new("Frame")
-                                                                separator.Size = UDim2.new(1, -24, 0, 1)
-                                                                separator.Position = UDim2.new(0, 12, 1, -1)
-                                                                separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                                                                separator.BackgroundTransparency = 0.92
-                                                                separator.BorderSizePixel = 0
-                                                                separator.Parent = optionButton
+                                                        local cellStroke = Instance.new("UIStroke")
+                                                        cellStroke.Color = Color3.fromRGB(56, 56, 64)
+                                                        cellStroke.Transparency = 0.4
+                                                        cellStroke.Thickness = 1
+                                                        cellStroke.Parent = cell
+
+                                                        local cellBtn = Instance.new("TextButton")
+                                                        cellBtn.Name = "Hit"
+                                                        cellBtn.Size = UDim2.new(1, 0, 1, 0)
+                                                        cellBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                                        cellBtn.BackgroundTransparency = 1
+                                                        cellBtn.BorderSizePixel = 0
+                                                        cellBtn.Text = ""
+                                                        cellBtn.AutoButtonColor = false
+                                                        cellBtn.Parent = cell
+
+                                                        local cellDot = Instance.new("Frame")
+                                                        cellDot.Size = UDim2.new(0, 4, 0, 4)
+                                                        cellDot.Position = UDim2.new(0, 9, 0.5, 0)
+                                                        cellDot.AnchorPoint = Vector2.new(0, 0.5)
+                                                        cellDot.BackgroundColor3 = accent()
+                                                        cellDot.BackgroundTransparency = 1
+                                                        cellDot.BorderSizePixel = 0
+                                                        cellDot.Parent = cell
+                                                        add_corner(cellDot, 8)
+
+                                                        local cellLabel = Instance.new("TextLabel")
+                                                        cellLabel.BackgroundTransparency = 1
+                                                        cellLabel.Size = UDim2.new(1, -46, 1, 0)
+                                                        cellLabel.Position = UDim2.fromOffset(19, 0)
+                                                        cellLabel.FontFace = Font.new(FONT, Enum.FontWeight.Medium)
+                                                        cellLabel.Text = name
+                                                        cellLabel.TextColor3 = Color3.fromRGB(205, 205, 212)
+                                                        cellLabel.TextSize = 11
+                                                        cellLabel.TextXAlignment = Enum.TextXAlignment.Left
+                                                        cellLabel.TextYAlignment = Enum.TextYAlignment.Center
+                                                        cellLabel.Parent = cell
+
+                                                        local keyChip = Instance.new("Frame")
+                                                        keyChip.AnchorPoint = Vector2.new(1, 0.5)
+                                                        keyChip.Position = UDim2.new(1, -6, 0.5, 0)
+                                                        keyChip.Size = UDim2.fromOffset(16, 16)
+                                                        keyChip.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                                                        keyChip.BackgroundTransparency = 0.94
+                                                        keyChip.BorderSizePixel = 0
+                                                        keyChip.Parent = cell
+                                                        add_corner(keyChip, 5)
+
+                                                        local keyLabel = Instance.new("TextLabel")
+                                                        keyLabel.BackgroundTransparency = 1
+                                                        keyLabel.Size = UDim2.new(1, 0, 1, 0)
+                                                        keyLabel.FontFace = Font.new(FONT, Enum.FontWeight.Bold)
+                                                        keyLabel.TextSize = 9
+                                                        keyLabel.TextColor3 = Color3.fromRGB(140, 140, 150)
+                                                        keyLabel.TextXAlignment = Enum.TextXAlignment.Center
+                                                        keyLabel.TextYAlignment = Enum.TextYAlignment.Center
+                                                        keyLabel.Text = "-"
+                                                        keyLabel.Parent = keyChip
+
+                                                        local hotkeyName = nil
+
+                                                        for keyCode, curveName in pairs(curveHotkeys) do
+                                                                if curveName == name then
+                                                                        hotkeyName = string.gsub(tostring(keyCode), "Enum.KeyCode.", "")
+                                                                        break
+                                                                end
                                                         end
 
-                                                        curvePill.buttons [index] = optionLabel
+                                                        keyLabel.Text = hotkeyName and (keyDisplay [hotkeyName] or hotkeyName) or "-"
 
-                                                        optionButton.MouseButton1Click:Connect(function()
-                                                                if not curveShortcutEnabled then
-                                                                        return
+                                                        cellBtn.MouseEnter:Connect(function()
+                                                                if name ~= currentCurveName then
+                                                                        TweenService:Create(cell, hoverPill, { BackgroundColor3 = Color3.fromRGB(44, 44, 52), BackgroundTransparency = 0.08 }):Play()
+                                                                        TweenService:Create(cellStroke, hoverPill, { Color = Color3.fromRGB(84, 84, 96), Transparency = 0.2 }):Play()
                                                                 end
+                                                        end)
 
+                                                        cellBtn.MouseLeave:Connect(function()
+                                                                if name ~= currentCurveName then
+                                                                        TweenService:Create(cell, hoverPill, { BackgroundColor3 = Color3.fromRGB(30, 30, 36), BackgroundTransparency = 0.2 }):Play()
+                                                                        TweenService:Create(cellStroke, hoverPill, { Color = Color3.fromRGB(56, 56, 64), Transparency = 0.4 }):Play()
+                                                                end
+                                                        end)
+
+                                                        cellBtn.MouseButton1Click:Connect(function()
                                                                 apply_curve_mode(name)
-                                                                close_popup()
+                                                                task.delay(0.14, curve_collapse)
                                                         end)
+
+                                                        table.insert(curvePill.cellOrder, name)
+                                                        curvePill.cells [name] = { group = cell, bg = cell, label = cellLabel, dot = cellDot, stroke = cellStroke, keyLabel = keyLabel, keyChip = keyChip }
                                                 end
 
-                                                local dragMoved = false
-                                                local dragStart = nil
-                                                local pillStartPos = nil
+                                                local headerBtn = Instance.new("TextButton")
+                                                headerBtn.Name = "HeaderHit"
+                                                headerBtn.BackgroundTransparency = 1
+                                                headerBtn.Position = UDim2.new(0, 0, 0, 0)
+                                                headerBtn.Size = UDim2.new(1, 0, 0, 46)
+                                                headerBtn.Text = ""
+                                                headerBtn.AutoButtonColor = false
+                                                headerBtn.ZIndex = 9
+                                                headerBtn.Parent = main
 
-                                                local pillHit = Instance.new("TextButton")
-                                                pillHit.Name = "PillHit"
-                                                pillHit.Size = UDim2.new(1, 0, 1, 0)
-                                                pillHit.BackgroundTransparency = 1
-                                                pillHit.Text = ""
-                                                pillHit.AutoButtonColor = false
-                                                pillHit.Parent = pill
+                                                headerBtn.MouseEnter:Connect(function()
+                                                        TweenService:Create(main, hoverPill, { BackgroundTransparency = 0 }):Play()
+                                                end)
 
-                                                local holdThread = nil
-                                                local holdReady = false
+                                                headerBtn.MouseLeave:Connect(function()
+                                                        TweenService:Create(main, hoverPill, { BackgroundTransparency = 0.02 }):Play()
+                                                end)
 
-                                                pillHit.InputBegan:Connect(function(input)
-                                                        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                                                                dragMoved = false
-                                                                holdReady = false
-                                                                dragStart = input.Position
-                                                                pillStartPos = pill.Position
-                                                                holdThread = task.delay(0.5, function()
-                                                                        holdReady = true
-                                                                end)
+                                                headerBtn.MouseButton1Click:Connect(function()
+                                                        if expanded then
+                                                                curve_collapse()
+                                                        else
+                                                                curve_expand()
                                                         end
                                                 end)
 
+                                                local dragging = false
+                                                local dragStart = nil
+                                                local startPos = nil
+
                                                 curvePill.drag = UserInputService.InputChanged:Connect(function(input)
-                                                        if not holdReady then
+                                                        if not dragging then
                                                                 return
                                                         end
 
                                                         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
                                                                 local delta = input.Position - dragStart
-
-                                                                if not dragMoved and (math.abs(delta.X) > 4 or math.abs(delta.Y) > 4) then
-                                                                        dragMoved = true
-
-                                                                        if popupOpen then
-                                                                                close_popup()
-                                                                        end
-                                                                end
-
-                                                                if dragMoved then
-                                                                        pill.Position = UDim2.new(pillStartPos.X.Scale, pillStartPos.X.Offset + delta.X, pillStartPos.Y.Scale, pillStartPos.Y.Offset + delta.Y)
-                                                                end
+                                                                root.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
                                                         end
                                                 end)
 
                                                 curvePill.release = UserInputService.InputEnded:Connect(function(input)
                                                         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                                                                if holdThread then
-                                                                        pcall(function()
-                                                                                task.cancel(holdThread)
-                                                                        end)
-                                                                        holdThread = nil
-                                                                end
-
-                                                                if not dragMoved then
-                                                                        local pos = input.Position
-                                                                        local abs = pill.AbsolutePosition
-                                                                        local size = pill.AbsoluteSize
-
-                                                                        if pos.X >= abs.X and pos.X <= abs.X + size.X and pos.Y >= abs.Y and pos.Y <= abs.Y + size.Y then
-                                                                                if popupOpen then
-                                                                                        close_popup()
-                                                                                else
-                                                                                        open_popup()
-                                                                                end
-                                                                        end
-                                                                end
-
-                                                                holdReady = false
-                                                                dragMoved = false
+                                                                dragging = false
                                                         end
                                                 end)
 
-                                                curvePill.gui = overlay
-                                                curvePill.frame = pill
-                                                curvePill.label = pillLabel
-                                                pill.Visible = curvePillOn
-
-                                                for _, lbl in ipairs(curvePill.buttons) do
-                                                        if lbl.Text == currentCurveName then
-                                                                lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                                                                lbl.TextTransparency = 0
+                                                local inputConn = UserInputService.InputBegan:Connect(function(input)
+                                                        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                                                                return
                                                         end
-                                                end
+
+                                                        local pos = input.Position
+                                                        local abs = root.AbsolutePosition
+                                                        local size = root.AbsoluteSize
+
+                                                        if pos.X < abs.X or pos.X > abs.X + size.X or pos.Y < abs.Y or pos.Y > abs.Y + size.Y then
+                                                                return
+                                                        end
+
+                                                        if expanded and pos.Y >= abs.Y + 46 then
+                                                                return
+                                                        end
+
+                                                        dragging = true
+                                                        dragStart = input.Position
+                                                        startPos = root.Position
+                                                end)
+
+                                                table.insert(curvePill.conns, inputConn)
+
+                                                curvePill.gui = overlay
+                                                curvePill.root = root
+                                                curvePill.header = header
+                                                curvePill.eyebrow = eyebrow
+                                                curve_pill_refresh(true)
                                         end
 
-                                        local curveShortcutModule = Combat:create_module({
+                                        curveTypeDropdown = ball:create_dropdown({
+                                                title = "Curve Type",
+                                                flag = "ParryDirection",
+                                                options = { "Camera", "Backwards", "Dot", "Slow", "High", "Left", "Right" },
+                                                default = "Camera",
+                                                multi_dropdown = false,
+                                                maximum_options = 7,
+                                                callback = function(value)
+                                                        apply_curve_mode(value, curveTypeDropdown)
+                                                end,
+                                        })
+
+                                        local curveModule = Combat:create_module({
                                                 title = "Curve Shortcut",
-                                                flag = "Curve_Shortcut",
-                                                description = "Switch curve fast with keys 1-7 or the on-screen pill",
+                                                flag = "Curve_UI",
+                                                description = "Draggable curve picker pill with hotkeys",
                                                 section = "left",
                                                 layout_order = 2,
                                                 callback = function(state)
-                                                        curveShortcutEnabled = state
+                                                        if state then
+                                                                curve_pill_create()
+                                                        else
+                                                                curve_pill_destroy()
+                                                        end
+                                                end,
+                                        })
 
-                                                        if curveShortcutConn then
-                                                                curveShortcutConn:Disconnect()
-                                                                curveShortcutConn = nil
+                                        curveModeDropdown = curveModule:create_dropdown({
+                                                title = "Curve Mode",
+                                                flag = "ParryDirection",
+                                                options = { "Camera", "Backwards", "Dot", "Slow", "High", "Left", "Right" },
+                                                default = "Camera",
+                                                multi_dropdown = false,
+                                                maximum_options = 7,
+                                                callback = function(value)
+                                                        apply_curve_mode(value, curveModeDropdown)
+                                                end,
+                                        })
+
+                                        curveModule:create_checkbox({
+                                                title = "Random Curve",
+                                                flag = "Curve_UI_Random",
+                                                callback = function(state)
+                                                        randomCurveOn = state
+
+                                                        if randomConn then
+                                                                randomConn:Disconnect()
+                                                                randomConn = nil
                                                         end
 
                                                         if state then
-                                                                curveShortcutConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
-                                                                        if gameProcessed or not curveShortcutEnabled then
+                                                                randomConn = RunService.PreSimulation:Connect(function()
+                                                                        local name = randomCurvePool [math.random(1, #randomCurvePool)]
+                                                                        SelectedParryType = parryTypeMap [name] or name
+                                                                        currentCurveName = name
+                                                                        curve_pill_refresh(false)
+                                                                end)
+                                                        else
+                                                                apply_curve_mode(currentCurveName)
+                                                        end
+                                                end,
+                                        })
+
+                                        curveModule:create_checkbox({
+                                                title = "Curve Hotkeys (1-7)",
+                                                flag = "Curve_UI_Hotkeys",
+                                                callback = function(state)
+                                                        hotkeysOn = state
+
+                                                        if hotkeyConn then
+                                                                hotkeyConn:Disconnect()
+                                                                hotkeyConn = nil
+                                                        end
+
+                                                        if state then
+                                                                hotkeyConn = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+                                                                        if gameProcessed or not hotkeysOn then
                                                                                 return
                                                                         end
 
@@ -11344,29 +11695,6 @@ do
                                                                                 apply_curve_mode(name)
                                                                         end
                                                                 end)
-                                                        end
-
-                                                        if curvePill.frame then
-                                                                curvePill.frame.Visible = state and curvePillOn
-                                                        end
-                                                end,
-                                        })
-
-                                        curveShortcutModule:create_checkbox({
-                                                title = "Show Curve Pill",
-                                                flag = "Curve_Shortcut_Pill",
-                                                callback = function(state)
-                                                        curvePillOn = state
-
-                                                        if not state then
-                                                                curve_pill_destroy()
-                                                                return
-                                                        end
-
-                                                        curve_pill_create()
-
-                                                        if curvePill.frame then
-                                                                curvePill.frame.Visible = curveShortcutEnabled
                                                         end
                                                 end,
                                         })
@@ -17354,6 +17682,133 @@ do
                 rewardNotifyBox:change_state(true)
         end
 end
+do
+        local function queue_fire(mode)
+                pcall(function()
+                        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("JoinQueue"):FireServer(mode, "FFA", "Normal")
+                end)
+        end
+
+        local autoQueueModule = Misc:create_module({
+                title = "Auto Queue",
+                flag = "ZX_AutoQueue",
+                description = "Automatically queue matches for you",
+                section = "left",
+                callback = function() end,
+        })
+
+        autoQueueModule:create_checkbox({
+                title = "Auto Ranked Queue",
+                flag = "ZX_AutoRankedQueue",
+                callback = function(state)
+                        getgenv().ZX_AutoRankedQueueEnabled = state == true
+
+                        if state then
+                                task.spawn(function()
+                                        while getgenv().ZX_AutoRankedQueueEnabled do
+                                                queue_fire("Ranked")
+                                                task.wait(5)
+                                        end
+                                end)
+                        end
+                end,
+        })
+
+        autoQueueModule:create_checkbox({
+                title = "Auto Casual Queue",
+                flag = "ZX_AutoCasualQueue",
+                callback = function(state)
+                        getgenv().ZX_AutoCasualQueueEnabled = state == true
+
+                        if state then
+                                task.spawn(function()
+                                        while getgenv().ZX_AutoCasualQueueEnabled do
+                                                queue_fire("Casual")
+                                                task.wait(5)
+                                        end
+                                end)
+                        end
+                end,
+        })
+
+        autoQueueModule:create_checkbox({
+                title = "Auto Re-Queue",
+                flag = "ZX_AutoReQueue",
+                callback = function(state)
+                        getgenv().ZX_AutoReQueueEnabled = state == true
+
+                        if state then
+                                if not moduleConnections ["Auto Re-Queue Event"] then
+                                        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                                        local gameEndRemote = nil
+
+                                        if remotes then
+                                                for _, name in ipairs({ "GameEnd", "GameEnded", "RoundEnd", "RoundEnded", "MatchEnd", "MatchEnded", "GameEndedEvent", "RoundOver" }) do
+                                                        local remote = remotes:FindFirstChild(name)
+
+                                                        if remote and remote:IsA("RemoteEvent") then
+                                                                gameEndRemote = remote
+                                                                break
+                                                        end
+                                                end
+                                        end
+
+                                        if gameEndRemote then
+                                                moduleConnections ["Auto Re-Queue Event"] = gameEndRemote.OnClientEvent:Connect(function()
+                                                        task.wait(2)
+
+                                                        if getgenv().ZX_AutoReQueueEnabled then
+                                                                queue_fire("Ranked")
+                                                        end
+                                                end)
+                                        end
+                                end
+
+                                if not moduleConnections ["Auto Re-Queue Loop"] then
+                                        moduleConnections ["Auto Re-Queue Loop"] = task.spawn(function()
+                                                while getgenv().ZX_AutoReQueueEnabled do
+                                                        local character = localPlayer.Character
+
+                                                        if character and character.PrimaryPart then
+                                                                local hasBall = false
+
+                                                                pcall(function()
+                                                                        local balls = workspace:FindFirstChild("Balls")
+
+                                                                        if balls then
+                                                                                for _, ball in ipairs(balls:GetChildren()) do
+                                                                                        if ball:IsA("BasePart") and ball:GetAttribute("realBall") then
+                                                                                                hasBall = true
+                                                                                                break
+                                                                                        end
+                                                                                end
+                                                                        end
+                                                                end)
+
+                                                                if not hasBall then
+                                                                        queue_fire("Ranked")
+                                                                end
+                                                        end
+
+                                                        task.wait(5)
+                                                end
+
+                                                moduleConnections ["Auto Re-Queue Loop"] = nil
+                                        end)
+                                end
+                        else
+                                if moduleConnections ["Auto Re-Queue Event"] then
+                                        moduleConnections ["Auto Re-Queue Event"]:Disconnect()
+                                        moduleConnections ["Auto Re-Queue Event"] = nil
+                                end
+
+                                moduleConnections ["Auto Re-Queue Loop"] = nil
+                        end
+                end,
+        })
+
+        autoQueueModule._size = autoQueueModule._size + 6
+end
 
 do
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -18024,6 +18479,109 @@ do
                 end,
         })
 
+        local gravityModule = Player:create_module({
+                title = "Gravity",
+                flag = "ZX_Gravity",
+                description = "Change world gravity (default 196.2)",
+                section = "right",
+                callback = function(state)
+                        if state then
+                                local savedGravity = tonumber(getgenv().ZX_CustomGravity)
+
+                                if savedGravity then
+                                        pcall(function()
+                                                workspace.Gravity = savedGravity
+                                        end)
+                                end
+                        else
+                                pcall(function()
+                                        workspace.Gravity = 196.2
+                                end)
+                        end
+                end,
+        })
+
+        gravityModule:create_slider({
+                title = "Custom Gravity",
+                flag = "ZX_CustomGravity",
+                minimum_value = 0,
+                maximum_value = 500,
+                value = 196,
+                round_number = true,
+                callback = function(value)
+                        getgenv().ZX_CustomGravity = value
+                        pcall(function()
+                                workspace.Gravity = value
+                        end)
+                end,
+        })
+
+        gravityModule:create_feature({
+                no_image = true,
+                title = "Reset to Default (196.2)",
+                button_callback = function()
+                        pcall(function()
+                                workspace.Gravity = 196.2
+                        end)
+
+                        Library.SendNotification({
+                                title = "Gravity",
+                                text = "Restored to default (196.2)",
+                                duration = 3,
+                        })
+                end,
+        })
+
+        gravityModule._size = gravityModule._size + 6
+
+        local infiniteJumpModule = Player:create_module({
+                title = "Infinite Jump",
+                flag = "ZX_InfiniteJump",
+                description = "Jump again while airborne (JumpRequest)",
+                section = "left",
+                callback = function(state)
+                        getgenv()._ZX_InfiniteJumpEnabled = state == true
+
+                        if state then
+                                pcall(function()
+                                        if getgenv()._ZX_InfiniteJumpConn then
+                                                getgenv()._ZX_InfiniteJumpConn:Disconnect()
+                                        end
+
+                                        getgenv()._ZX_InfiniteJumpConn = UserInputService.JumpRequest:Connect(function()
+                                                if not getgenv()._ZX_InfiniteJumpEnabled then
+                                                        return
+                                                end
+
+                                                local character = localPlayer.Character
+
+                                                if not character then
+                                                        return
+                                                end
+
+                                                local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+                                                if not humanoid then
+                                                        return
+                                                end
+
+                                                pcall(function()
+                                                        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                                                end)
+                                        end)
+                                end)
+                        elseif getgenv()._ZX_InfiniteJumpConn then
+                                pcall(function()
+                                        getgenv()._ZX_InfiniteJumpConn:Disconnect()
+                                end)
+
+                                getgenv()._ZX_InfiniteJumpConn = nil
+                        end
+                end,
+        })
+
+        infiniteJumpModule._size = infiniteJumpModule._size + 6
+
         local hitSoundEnabled = false
         local hitSoundFolder = Instance.new("Folder")
         hitSoundFolder.Name = "KazeHitSounds"
@@ -18182,6 +18740,162 @@ do
                         getgenv().VisualiserHue = state
                 end,
         })
+end
+do
+        local trailHue = 0
+        local trailColor = Color3.new(1, 1, 1)
+        local trackedBalls = setmetatable({}, { __mode = "k" })
+
+        local function clear_ball_effects(ball)
+                for _, objectName in ipairs({ "KazeTrail", "KazeEmitter", "KazeGlow", "KazeAtt0", "KazeAtt1" }) do
+                        local object = ball:FindFirstChild(objectName)
+
+                        if object then
+                                object:Destroy()
+                        end
+                end
+
+                trackedBalls [ball] = nil
+        end
+
+        local function apply_ball_effects(ball)
+                if not getgenv().BallTrailEnabled then
+                        if trackedBalls [ball] then
+                                clear_ball_effects(ball)
+                        end
+
+                        return
+                end
+
+                if trackedBalls [ball] then
+                        local trail = ball:FindFirstChild("KazeTrail")
+
+                        if trail then
+                                if getgenv().BallTrailRainbowEnabled then
+                                        local color = Color3.fromHSV(trailHue / 360, 1, 1)
+                                        trail.Color = ColorSequence.new(color)
+                                        trailColor = color
+                                else
+                                        trail.Color = ColorSequence.new(trailColor)
+                                end
+                        end
+
+                        return
+                end
+
+                trackedBalls [ball] = true
+
+                local att0 = Instance.new("Attachment")
+                att0.Name = "KazeAtt0"
+                att0.Position = Vector3.new(0, ball.Size.Y / 2, 0)
+                att0.Parent = ball
+
+                local att1 = Instance.new("Attachment")
+                att1.Name = "KazeAtt1"
+                att1.Position = Vector3.new(0, -ball.Size.Y / 2, 0)
+                att1.Parent = ball
+
+                local trail = Instance.new("Trail")
+                trail.Name = "KazeTrail"
+                trail.Attachment0 = att0
+                trail.Attachment1 = att1
+                trail.Lifetime = 0.4
+                trail.WidthScale = NumberSequence.new(0.5)
+                trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) })
+                trail.Color = ColorSequence.new(trailColor)
+                trail.Parent = ball
+
+                if getgenv().BallTrailParticleEnabled then
+                        local emitter = Instance.new("ParticleEmitter")
+                        emitter.Name = "KazeEmitter"
+                        emitter.Rate = 100
+                        emitter.Lifetime = NumberRange.new(0.5, 1)
+                        emitter.Speed = NumberRange.new(0, 1)
+                        emitter.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 0) })
+                        emitter.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) })
+                        emitter.Color = ColorSequence.new(trailColor)
+                        emitter.Parent = ball
+                end
+
+                if getgenv().BallTrailGlowEnabled then
+                        local glow = Instance.new("PointLight")
+                        glow.Name = "KazeGlow"
+                        glow.Range = 15
+                        glow.Brightness = 2
+                        glow.Color = trailColor
+                        glow.Parent = ball
+                end
+        end
+
+        moduleConnections ["Ball Trail Hue"] = RunService.Heartbeat:Connect(function()
+                trailHue = (trailHue + 1) % 360
+
+                for _, ball in Functions.Get_Balls() do
+                        if ball:IsA("BasePart") then
+                                apply_ball_effects(ball)
+                        end
+                end
+        end)
+
+        local ballTrailModule = VisualsTab:create_module({
+                title = "Ball Trail",
+                flag = "Ball_Trail",
+                description = "Adds a custom trail to the ball",
+                section = "left",
+                callback = function(state)
+                        getgenv().BallTrailEnabled = state == true
+
+                        if not state then
+                                for ball in pairs(trackedBalls) do
+                                        if ball.Parent then
+                                                clear_ball_effects(ball)
+                                        end
+                                end
+
+                                table.clear(trackedBalls)
+                        end
+                end,
+        })
+
+        ballTrailModule:create_slider({
+                title = "Ball Trail Hue",
+                flag = "Ball_Trail_Hue",
+                minimum_value = 0,
+                maximum_value = 360,
+                value = 0,
+                round_number = true,
+                callback = function(value)
+                        if not getgenv().BallTrailRainbowEnabled then
+                                trailColor = Color3.fromHSV(value / 360, 1, 1)
+                        end
+                end,
+        })
+
+        ballTrailModule:create_checkbox({
+                title = "Rainbow Trail",
+                flag = "Ball_Trail_Rainbow",
+                callback = function(state)
+                        getgenv().BallTrailRainbowEnabled = state == true
+                end,
+        })
+
+        ballTrailModule:create_checkbox({
+                title = "Particle Emitter",
+                flag = "Ball_Trail_Particle",
+                callback = function(state)
+                        getgenv().BallTrailParticleEnabled = state == true
+                end,
+        })
+
+        ballTrailModule:create_checkbox({
+                title = "Glow Effect",
+                flag = "Ball_Trail_Glow",
+                callback = function(state)
+                        getgenv().BallTrailGlowEnabled = state == true
+                end,
+        })
+
+        ballTrailModule._size = ballTrailModule._size + 6
 end
 
 do
